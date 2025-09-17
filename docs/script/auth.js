@@ -27,15 +27,35 @@ auth.onAuthStateChanged(user => {
              window.location.href = '/home.html';
         }
     } else {
-        console.log("Auth guard: No user logged in.");
-        // If not logged in and on a protected page, redirect to index.html
-        // (index.html will then guide them to login/signup)
-        const protectedPaths = ['home.html', '/profile.html', '/optimizer.html', '/roadmap.html', '/joblisting.html','/interview.html'];
-        if (protectedPaths.includes(window.location.pathname) || (window.location.pathname.startsWith('/script') && !window.location.pathname.includes('login.js'))) {
-            window.location.href = 'index.html';
-        }
+    console.log("Auth guard: No user logged in.");
+    // If not logged in and on a protected page, redirect to index.html
+    const repoName = '/AI-Career-coach';
+
+    let pagePath = window.location.pathname;
+
+    //    This makes '/AI-Career-coach/profile.html' become '/profile.html'.
+    if (pagePath.startsWith(repoName)) {
+        pagePath = pagePath.substring(repoName.length);
+    }
+
+    const protectedPaths = [
+        '/home.html', 
+        '/profile.html', 
+        '/optimizer.html', 
+        '/roadmap.html', 
+        '/joblisting.html',
+        '/interview.html',
+        '/assessment.html' // Added assessment page for consistency
+    ];
+    
+    if (protectedPaths.includes(pagePath)) {
+        console.log(`Access to protected page '${pagePath}' denied. Redirecting.`);
+        // This relative redirect will correctly go to index.html in the same directory.
+        window.location.href = 'index.html';
+    }
         // If already on index.html or login.html, do nothing (let them choose)
     }
 
 });
+
 
