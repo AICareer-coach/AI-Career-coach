@@ -30,7 +30,7 @@ auth.onAuthStateChanged(user => {
         console.log("Auth guard: No user logged in.");
         // If not logged in and on a protected page, redirect to index.html
         // (index.html will then guide them to login/signup)
-        const protectedPaths = ['/home.html', '/profile.html', '/optimizer.html', '/roadmap.html', '/joblisting.html','/interview.html'];
+        const protectedPaths = ['home.html', '/profile.html', '/optimizer.html', '/roadmap.html', '/joblisting.html','/interview.html'];
         if (protectedPaths.includes(window.location.pathname) || (window.location.pathname.startsWith('/script') && !window.location.pathname.includes('login.js'))) {
             window.location.href = 'index.html';
         }
@@ -38,3 +38,4 @@ auth.onAuthStateChanged(user => {
     }
 
 });
+
