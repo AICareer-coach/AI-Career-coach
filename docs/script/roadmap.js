@@ -655,3 +655,17 @@ function appendTypingIndicator() {
   return el;
 }
 
+
+    const logoutButton = document.getElementById("logoutButton");
+    if (logoutButton) {
+        logoutButton.addEventListener("click", async () => {
+            try {
+                await firebase.auth().signOut();
+                window.location.href = "index.html";
+            } catch (error) {
+                console.error("Error signing out:", error);
+                alert("Failed to log out. Please try again.");
+            }
+        });
+    }
+
