@@ -107,9 +107,8 @@ function initializeEventListeners() {
     );
   }
 
-document.getElementById("logoutButton").addEventListener("click", function() {
-    window.location.href = "index.html";
-  });
+  if (logoutButton) logoutButton.addEventListener("click", handleLogout);
+}
 
 /**
  * Fetches the user's latest roadmap from the server or shows the creation form.
@@ -654,5 +653,3 @@ function appendTypingIndicator() {
   chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
   return el;
 }
-
-
