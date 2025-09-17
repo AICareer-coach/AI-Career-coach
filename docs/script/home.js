@@ -15,10 +15,6 @@ let logoutBtnSidebar;
 let particlesContainer;
 let animatedFeatureCards;
 
-document.getElementById("logout-btn-sidebar").addEventListener("click", function() {
-    window.location.href = "index.html";
-  });
-
 /**
  * This function will be called by auth.js when the user is confirmed to be logged in.
  * This is the primary entry point for dynamic content after authentication.
@@ -54,6 +50,7 @@ function onUserLoggedIn(user) {
             // 'auth' object is global from firebase-auth-compat.js
             await auth.signOut(); 
             console.log('User signed out successfully.');
+            window.location.href = "index.html";
             // auth.js onAuthStateChanged listener handles redirection
         } catch (error) {
             console.error('Sign out error', error);
@@ -188,3 +185,4 @@ async function fetchAndDisplayStats() {
     }
 
 }
+
