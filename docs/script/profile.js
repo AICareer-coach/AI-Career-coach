@@ -30,6 +30,10 @@ const skillsContainer = document.getElementById("skills-container");
 const projectsContainer = document.getElementById("projects-list-container");
 const skillsInput = document.getElementById("profileSkillsInput");
 
+document.getElementById("logoutButton").addEventListener("click", function() {
+    window.location.href = "index.html";
+  });
+
 /**
  * Main entry point, called by auth.js after user logs in.
  */
@@ -409,3 +413,4 @@ async function handleLogout() {
     console.error("Error signing out:", error);
   }
 }
+
