@@ -15,6 +15,10 @@ let logoutBtnSidebar;
 let particlesContainer;
 let animatedFeatureCards;
 
+document.getElementById("logout-btn-sidebar").addEventListener("click", function() {
+    window.location.href = "index.html";
+  });
+
 /**
  * This function will be called by auth.js when the user is confirmed to be logged in.
  * This is the primary entry point for dynamic content after authentication.
@@ -182,4 +186,5 @@ async function fetchAndDisplayStats() {
         if (statsAssessmentsP) statsAssessmentsP.textContent = '✨';
         if (statsJobsP) statsJobsP.textContent = '✨';
     }
+
 }
