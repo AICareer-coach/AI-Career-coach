@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - AI Career Coach</title>
+    <link rel="stylesheet" href="./style/home.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <link rel="icon" type="image/png" href="./assets/favicon.png">
+</head>
+
+<body>
+    <div class="background-glow"></div>
+    <div class="particles-container" id="particles"></div>
+
+    <aside class="sidebar">
+        <header class="sidebar-header">
+            <h2><i class="fas fa-robot"></i> AI Career Coach</h2>
+        </header>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="roadmap.html"><i class="fas fa-route"></i> Roadmap</a></li>
+                <li><a href="optimizer.html"><i class="fas fa-file-alt"></i> Resume & LinkedIn</a></li>
+                <li><a href="assessment.html"><i class="fas fa-chart-line"></i> Skill Assessment</a></li>
+                <li><a href="joblisting.html"><i class="fas fa-briefcase"></i> Job Matching</a></li>
+                <li><a href="interview.html"><i class="fas fa-briefcase"></i> Mock Interview</a></li>
+                <li><a href="profile.html"><i class="fas fa-user-circle"></i> Profile Settings</a></li>
+            </ul>
+        </nav>
+        <footer class="sidebar-footer">
+            <button id="logout-btn-sidebar" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </footer>
+    </aside>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <h1>AI Career Coach</h1>
+            <p>Empower your career journey with personalized AI-driven insights, roadmap generation, resume
+                optimization, skill assessments, and job matching tailored to your aspirations.</p>
+        </section>
+
+        <header class="dashboard-header">
+            <h2>Dashboard Overview</h2>
+            <p id="welcome-message">Welcome, User!</p>
+        </header>
+
+        <section class="quick-stats">
+            <div class="stat-card">
+                <i class="fas fa-route stat-icon"></i>
+                <div class="stat-card-header">
+                    <h3>Roadmaps Generated</h3>
+                </div>
+                <p class="stat-number" id="stats-roadmaps">✨</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-file-alt stat-icon"></i>
+                <div class="stat-card-header">
+                    <h3>Resumes Optimized</h3>
+                </div>
+                <p class="stat-number" id="stats-resumes">✨</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-chart-line stat-icon"></i>
+                <div class="stat-card-header">
+                    <h3>Skill Assessments</h3>
+                </div>
+                <p class="stat-number" id="stats-assessments">✨</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-briefcase stat-icon"></i>
+                <div class="stat-card-header">
+                    <h3>Jobs Searched</h3>
+                </div>
+                <p class="stat-number" id="stats-jobs">✨</p>
+            </div>
+        </section>
+
+        <div class="dashboard-container">
+            <main class="dashboard-grid">
+                <div id="roadmap-card" class="feature-card">
+                    <div class="card-content-wrapper">
+                        <h4 class="card_title"><i class="fas fa-route"></i> Elaborative Roadmap</h4>
+                        <p class="card_paragraph">Get a personalized, step-by-step career roadmap from your current
+                            skills to your desired role.</p>
+                        <hr class="line" />
+                        <ul class="card__list">
+                            <li class="card__list_item"><i class="fas fa-check-circle check_svg"></i> <span
+                                    class="list_text">Stepwise career path guidance</span></li>
+                            <li class="card__list_item"><i class="fas fa-check-circle check_svg"></i> <span
+                                    class="list_text">Skill gap identification</span></li>
+                        </ul>
+                    </div>
+                    <button class="btn primary-gradient-btn">Generate Roadmap</button>
+                </div>
+
+                <div id="optimizer-card" class="feature-card">
+                    <div class="card-content-wrapper">
+                        <h4 class="card_title"><i class="fas fa-file-alt"></i> Resume & LinkedIn Optimizer</h4>
+                        <p class="card_paragraph">Enhance your resume and LinkedIn profile with AI-powered suggestions
+                            to stand out to recruiters.</p>
+                        <hr class="line" />
+                        <ul class="card__list">
+                            <li class="card__list_item"><i class="fas fa-check-circle check_svg"></i> <span
+                                    class="list_text">AI-driven resume enhancements</span></li>
+                            <li class="card__list_item"><i class="fas fa-check-circle check_svg"></i> <span
+                                    class="list_text">LinkedIn profile optimization</span></li>
+                        </ul>
+                    </div>
+                    <button class="btn primary-gradient-btn">Go to Optimizer</button>
+                </div>
+                <div id="assessment-card" class="feature-card">
+                    <div class="card-content-wrapper">
+                        <h4 class="card_title"><i class="fas fa-chart-line"></i> Skill Assessment</h4>
+                        <p class="card_paragraph">Evaluate your current skills and identify areas for improvement with
+                            our comprehensive assessment tools.</p>
+                        <hr class="line" />
+                        <ul class="card__list">
+                            <li class="card__list_item"><i class="fas fa-check-circle check_svg"></i> <span
+                                    class="list_text">Technical skill evaluation</span></li>
+                            <li class="card__list_item"><i class="fas fa-check-circle check_svg"></i> <span
+                                    class="list_text">Personalized improvement plan</span></li>
+                        </ul>
+                    </div>
+                    <button class="btn primary-gradient-btn">Start Assessment</button>
+                </div>
+                <div id="jobs-card" class="feature-card">
+                    <div class="card-content-wrapper">
+                        <h4 class="card_title"><i class="fas fa-briefcase"></i> Job Matching</h4>
+                        <p class="card_paragraph">Discover job opportunities that match your skills, experience, and
+                            career aspirations.</p>
+                        <hr class="line" />
+                        <ul class="card__list">
+                            <li class="card__list_item"><i class="fas fa-check-circle check_svg"></i> <span
+                                    class="list_text">Personalized job recommendations</span></li>
+                            <li class="card__list_item"><i class="fas fa-check-circle check_svg"></i> <span
+                                    class="list_text">Application tracking</span></li>
+                        </ul>
+                    </div>
+                    <button class="btn primary-gradient-btn">Find Jobs</button>
+                </div>
+                <div id="interview-card" class="feature-card">
+                    <div class="card-content-wrapper">
+                        <h4 class="card_title"><i class="fas fa-briefcase"></i> Mock Interview</h4>
+                        <p class="card_paragraph">Sharpen your interview skills.</p>
+                        <hr class="line" />
+                        <ul class="card__list">
+                            <li class="card__list_item"><i class="fas fa-check-circle check_svg"></i> <span
+                                    class="list_text">Simulate realistic job interviews.</span></li>
+                            <li class="card__list_item"><i class="fas fa-check-circle check_svg"></i> <span
+                                    class="list_text">Build confidence for any interview.</span></li>
+                        </ul>
+                    </div>
+                    <button class="btn primary-gradient-btn">Start interview</button>
+                </div>
+            </main>
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="./script/auth.js"></script>
+
+    <script src="./script/home.js"></script>
+</body>
+
+</html>
