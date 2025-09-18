@@ -92,6 +92,10 @@ loginForm.addEventListener('submit', async (e) => {
 const handleGoogleAuth = async () => {
     hideError();
     try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({
+            prompt: 'select_account'
+        });
         const result = await auth.signInWithPopup(provider);
         const idToken = await result.user.getIdToken();
 
@@ -138,4 +142,5 @@ document.querySelectorAll('.toggle-password').forEach(toggle => {
             icon.classList.add('fa-eye');
         }
     });
+
 });
