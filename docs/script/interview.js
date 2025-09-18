@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://ai-career-coach-backend-3.onrender.com';
+const API_BASE_URL = 'https://ai-career-coach-backend-amp9.onrender.com';
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -204,4 +204,5 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
 
