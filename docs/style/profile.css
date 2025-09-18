@@ -95,6 +95,7 @@
         }
 
         .nav-link, .nav-button {
+            font-size: 1rem;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
@@ -460,4 +461,5 @@
 html {
   scrollbar-width: thin; /* Can be 'auto', 'thin', or 'none' */
   scrollbar-color: var(--secondary) var(--background); /* thumb color, track color */
+
 }
