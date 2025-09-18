@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://ai-career-coach-backend-3.onrender.com';
+const API_BASE_URL = 'https://ai-career-coach-backend-amp9.onrender.com';
 
 // Get references to all the HTML elements on this page
 const fileInput = document.getElementById("resume_file");
@@ -698,4 +698,5 @@ function hideAllErrors() {
 // Initial check for user authentication state is handled by auth.js
 
 // auth.js will call onUserLoggedIn if a user is already signed in.
+
 
