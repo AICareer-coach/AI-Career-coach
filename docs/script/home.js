@@ -50,7 +50,7 @@ function onUserLoggedIn(user) {
             // 'auth' object is global from firebase-auth-compat.js
             await auth.signOut(); 
             console.log('User signed out successfully.');
-            window.location.href = "index.html";
+            // window.location.href = "index.html";
             // auth.js onAuthStateChanged listener handles redirection
         } catch (error) {
             console.error('Sign out error', error);
@@ -185,4 +185,5 @@ async function fetchAndDisplayStats() {
     }
 
 }
+
 
