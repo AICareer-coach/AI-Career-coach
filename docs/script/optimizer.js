@@ -102,7 +102,6 @@ function onUserLoggedIn(user) {
                 await firebase.auth().signOut();
                 localStorage.removeItem(JOB_DESCRIPTION_LOCAL_STORAGE_KEY); // NEW: Clear job description from local storage on logout
                 console.log('Job description cleared from local storage on logout.');
-                window.location.href = "index.html";
             } catch (error) {
                 console.error("Error signing out:", error);
                 alert("Failed to log out. Please try again.");
@@ -699,3 +698,4 @@ function hideAllErrors() {
 // Initial check for user authentication state is handled by auth.js
 
 // auth.js will call onUserLoggedIn if a user is already signed in.
+
