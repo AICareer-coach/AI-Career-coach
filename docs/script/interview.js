@@ -198,10 +198,10 @@ document.addEventListener('DOMContentLoaded', () => {
         logoutButton.addEventListener("click", async () => {
             try {
                 await firebase.auth().signOut();
-                window.location.href = "index.html";
             } catch (error) {
                 console.error("Error signing out:", error);
                 alert("Failed to log out. Please try again.");
             }
         });
     }
+
