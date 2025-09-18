@@ -79,13 +79,14 @@
         
         .header-nav { display: flex; gap: 1rem; }
         .nav-link, .nav-button {
+            font-size: 1rem;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             padding: 0.7rem 1.3rem;
             border-radius: 12px;
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s ease;
             color: var(--text-muted);
             border: 1px solid var(--border-color);
@@ -475,4 +476,5 @@
 html {
   scrollbar-width: thin; /* Can be 'auto', 'thin', or 'none' */
   scrollbar-color: var(--secondary) var(--background); /* thumb color, track color */
+
 }
