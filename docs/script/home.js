@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://ai-career-coach-backend-3.onrender.com';
+const API_BASE_URL = 'https://ai-career-coach-backend-amp9.onrender.com';
 
 // Declare global variables with 'let' or without initial assignment.
 // They will be assigned their DOM element references *inside* onUserLoggedIn/DOMContentLoaded.
@@ -185,5 +185,6 @@ async function fetchAndDisplayStats() {
     }
 
 }
+
 
 
