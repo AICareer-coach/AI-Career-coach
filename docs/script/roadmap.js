@@ -655,14 +655,10 @@ function appendTypingIndicator() {
 }
 
 
-    // Add the event listener for the logout button
-    const logoutButton = document.getElementById("logoutButton");
     if (logoutButton) {
         logoutButton.addEventListener("click", async () => {
             try {
                 await firebase.auth().signOut();
-                localStorage.removeItem(JOB_DESCRIPTION_LOCAL_STORAGE_KEY); // NEW: Clear job description from local storage on logout
-                console.log('Job description cleared from local storage on logout.');
                 window.location.href = "index.html";
             } catch (error) {
                 console.error("Error signing out:", error);
@@ -670,3 +666,4 @@ function appendTypingIndicator() {
             }
         });
     }
+
