@@ -526,7 +526,6 @@ function hideStatus(div) {
 async function handleLogout() {
   try {
     await firebase.auth().signOut();
-    window.location.href = 'index.html'; 
   } catch (error) {
     console.error("Error signing out:", error);
   }
@@ -654,4 +653,5 @@ function appendTypingIndicator() {
   chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
   return el;
 }
+
 
