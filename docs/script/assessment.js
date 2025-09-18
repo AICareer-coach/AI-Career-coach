@@ -552,12 +552,11 @@ function hideAllStatusMessages() {
 async function handleLogout() {
     try {
         await firebase.auth().signOut();
-        // Redirect to login page or update UI after successful sign-out
-        window.location.href = 'index.html'; 
     } catch (error) {
         console.error("Error signing out:", error);
         // Show status on the most likely visible status div
         const statusDiv = assessmentResultsSection.classList.contains('hidden') ? setupStatusMessageDiv : resultsStatusMessageDiv;
         showStatus(statusDiv, "Failed to log out. Please try again.", true);
     }
+
 }
