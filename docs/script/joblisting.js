@@ -337,7 +337,6 @@ function showLoading(show) {
 async function handleLogout() {
     try {
         await firebase.auth().signOut();
-        window.location.href = "index.html";
     } catch (error) {
         console.error("Error signing out:", error);
         alert("Failed to log out. Please try again.");
@@ -347,3 +346,4 @@ async function handleLogout() {
 // Initial check for user authentication state is handled by auth.js
 
 // auth.js will call onUserLoggedIn if a user is already signed in.
+
