@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://ai-career-coach-backend-3.onrender.com";
+const API_BASE_URL = 'https://ai-career-coach-backend-amp9.onrender.com';
 let currentUser = null;
 let originalResumeData = {}; // To store the initial state for the "Cancel" button
 
@@ -410,6 +410,7 @@ async function handleLogout() {
     console.error("Error signing out:", error);
   }
 }
+
 
 
 
