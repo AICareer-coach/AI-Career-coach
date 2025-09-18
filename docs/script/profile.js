@@ -406,10 +406,10 @@ function showStatus(div, message, isError = false) {
 async function handleLogout() {
   try {
     await firebase.auth().signOut();
-    window.location.href = "index.html";
   } catch (error) {
     console.error("Error signing out:", error);
   }
 }
+
 
 
