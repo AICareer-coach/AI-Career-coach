@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://ai-career-coach-backend-3.onrender.com';
+const API_BASE_URL = 'https://ai-career-coach-backend-amp9.onrender.com';
 
 let currentUser = null;
 // CORRECTED: Initialize fetchedResumeContent to an empty object to prevent ReferenceErrors
@@ -346,4 +346,5 @@ async function handleLogout() {
 // Initial check for user authentication state is handled by auth.js
 
 // auth.js will call onUserLoggedIn if a user is already signed in.
+
 
