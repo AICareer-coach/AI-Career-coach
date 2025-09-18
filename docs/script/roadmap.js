@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://ai-career-coach-backend-3.onrender.com';
+const API_BASE_URL = 'https://ai-career-coach-backend-amp9.onrender.com';
 
 let currentUser = null;
 let currentRoadmapData = null; // To store the generated/fetched roadmap
@@ -653,5 +653,6 @@ function appendTypingIndicator() {
   chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
   return el;
 }
+
 
 
