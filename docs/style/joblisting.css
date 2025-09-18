@@ -92,7 +92,7 @@ body {
     padding: 0.7rem 1.3rem;
     border-radius: 12px;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
     transition: all 0.3s ease;
     color: var(--text-muted);
     border: 1px solid var(--border-color);
@@ -309,4 +309,5 @@ body {
 .upload-area.hidden-by-js {
     display: none !important;
 }
+
 
