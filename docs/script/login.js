@@ -11,7 +11,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const provider = new firebase.auth.GoogleAuthProvider();
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'https://ai-career-coach-backend-amp9.onrender.com';
 
 // --- DOM Element References ---
 const loginFormContainer = document.getElementById('login-form-container');
@@ -144,3 +144,4 @@ document.querySelectorAll('.toggle-password').forEach(toggle => {
     });
 
 });
+
