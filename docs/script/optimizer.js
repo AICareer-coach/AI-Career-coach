@@ -117,9 +117,9 @@ function onUserLoggedIn(user) {
         if (fileInput.files.length > 0) {
             const selectedFile = fileInput.files[0];
             fileNameSpan.textContent = selectedFile.name;
-            console.log('Selected file name:', selectedFile.name);
-            console.log('Selected file type:', selectedFile.type);
-            console.log('Selected file size:', selectedFile.size, 'bytes');
+            // console.log('Selected file name:', selectedFile.name);
+            // console.log('Selected file type:', selectedFile.type);
+            // console.log('Selected file size:', selectedFile.size, 'bytes');
         } else {
             fileNameSpan.textContent = 'No file chosen';
             // console.log('No file chosen.');
@@ -214,7 +214,7 @@ async function fetchAndSuggestOptimizations() {
         const data = await response.json();
 
         if (!response.ok) {
-            // console.error('Failed to fetch profile/resume for suggestions:', data.detail || data.message);
+            console.error('Failed to fetch profile/resume for suggestions:', data.detail || data.message);
             // Don't show error to user if no resume is found yet, it's a normal state.
             // showStatus(uploadErrorMessageDiv, 'Could not fetch resume for optimization suggestions. User can manually input requests.', true);
             fetchedResumeContent = null; // Ensure it's cleared if fetch fails
@@ -315,7 +315,7 @@ uploadForm.addEventListener("submit", async (e) => {
   console.log('useSavedResume:', useSavedResume);
   console.log('file present:', !!file);
   if (file) {
-      console.log('File details for submission);
+      // console.log('File details for submission:', file.name, file.type, file.size);
   }
 
 
@@ -363,7 +363,7 @@ uploadForm.addEventListener("submit", async (e) => {
       throw new Error(backendResponseData.detail || backendResponseData.message || 'Upload/analysis failed.');
     }
     
-    console.log("Resume processed successfully:", backendResponseData);
+    // console.log("Resume processed successfully:", backendResponseData);
 
     uploadSection.classList.add("hidden");
     fullAnalysisReportSection.classList.remove("hidden"); // Show full analysis section
@@ -672,7 +672,7 @@ function showStatus(targetDiv, message, isError = false) {
         targetDiv.className = isError ? 'status-message error' : 'status-message success';
         targetDiv.classList.remove("hidden");
     } else {
-        // console.error("Error: targetDiv for status message is null or undefined.", message);
+        console.error("Error: targetDiv for status message is null or undefined.", message);
         alert(`Status Message Error: ${message}`);
     }
 }
@@ -698,6 +698,5 @@ function hideAllErrors() {
 // Initial check for user authentication state is handled by auth.js
 
 // auth.js will call onUserLoggedIn if a user is already signed in.
-
 
 
