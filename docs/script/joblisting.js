@@ -36,7 +36,7 @@ const savedResumeNameSpan = document.getElementById('savedResumeName');
  */
 async function onUserLoggedIn(user) { // CORRECTED: Made async
     currentUser = user;
-    console.log("JobListing page: User logged in:", currentUser.uid);
+    // console.log("JobListing page: User logged in:", currentUser.uid);
     initializeEventListeners();
     // CORRECTED: Await this call to ensure fetchedResumeContent is populated BEFORE toggle
     await fetchAndPopulateSavedResumeInfo(); 
@@ -98,7 +98,7 @@ function updateFileName() {
  */
 async function fetchAndPopulateSavedResumeInfo() {
     if (!currentUser) {
-        console.log('User not logged in, cannot fetch saved resume info.');
+        // console.log('User not logged in, cannot fetch saved resume info.');
         fetchedResumeContent = {}; // Ensure it's an empty object if no user
         return;
     }
@@ -115,25 +115,25 @@ async function fetchAndPopulateSavedResumeInfo() {
         const data = await response.json();
 
         if (!response.ok) {
-            console.error('Failed to fetch user profile for saved resume info:', data.detail || data.message);
+            // console.error('Failed to fetch user profile for saved resume info:', data.detail || data.message);
             fetchedResumeContent = {}; // Ensure it's an empty object on error
             return;
         }
 
-        console.log('API Response data from /api/user/profile:', data);
+        // console.log('API Response data from /api/user/profile:', data);
         
         // This part depends on how your /api/user/profile endpoint returns resume data.
         // Assuming it either has 'resume_content.resume_metadata' or 'resume_metadata' directly.
         if (data.resume_content && data.resume_content.resume_metadata) {
             fetchedResumeContent = data.resume_content;
-            console.log('Fetched resume_content with metadata from user profile:', fetchedResumeContent);
+            // console.log('Fetched resume_content with metadata from user profile:', fetchedResumeContent);
         } else if (data.resume_metadata) { // Fallback if resume_metadata is directly top-level
             fetchedResumeContent = { resume_metadata: data.resume_metadata };
-            console.log('Fetched top-level resume_metadata from user profile:', fetchedResumeContent);
+            // console.log('Fetched top-level resume_metadata from user profile:', fetchedResumeContent);
         }
         else {
             fetchedResumeContent = {}; // No resume info found
-            console.warn('No "resume_content" or "resume_metadata" found in user profile data.');
+            // console.warn('No "resume_content" or "resume_metadata" found in user profile data.');
         }
 
     } catch (error) {
@@ -161,7 +161,7 @@ function toggleResumeInputVisibility() {
         savedResumeInfoDisplay.classList.remove('hidden');
 
         // Populate saved resume info (only name)
-        console.log('Populating saved resume info. fetchedResumeContent:', fetchedResumeContent);
+        // console.log('Populating saved resume info. fetchedResumeContent:', fetchedResumeContent);
         
         // Access properties defensively using optional chaining
         const resumeMetadata = fetchedResumeContent?.resume_metadata; 
@@ -170,7 +170,7 @@ function toggleResumeInputVisibility() {
 
         if (fileName) {
             savedResumeNameSpan.textContent = fileName;
-            console.log('Displaying saved file name:', fileName);
+            // console.log('Displaying saved file name:', fileName);
         } else {
             savedResumeNameSpan.textContent = 'No saved resume found.'; // More explicit message
             console.warn('No file_name found in fetchedResumeContent?.resume_metadata to display.');
@@ -179,7 +179,7 @@ function toggleResumeInputVisibility() {
         // REMOVED: Date display logic
         // savedResumeDateSpan.textContent = 'N/A'; // Ensure it's cleared if it was ever set
 
-        console.log('Toggle: Using saved resume. Upload hidden, saved info shown (only name).');
+        // console.log('Toggle: Using saved resume. Upload hidden, saved info shown (only name).');
 
     } else {
         // Show the file upload input elements
@@ -190,7 +190,7 @@ function toggleResumeInputVisibility() {
         savedResumeInfoDisplay.classList.add('hidden');
         savedResumeNameSpan.textContent = 'N/A';
         // REMOVED: savedResumeDateSpan.textContent = 'N/A';
-        console.log('Toggle: Not using saved resume. Upload shown, saved info hidden.');
+        // console.log('Toggle: Not using saved resume. Upload shown, saved info hidden.');
     }
     hideStatus(jobSearchStatusDiv); // Clear any old status messages
 }
@@ -346,5 +346,6 @@ async function handleLogout() {
 // Initial check for user authentication state is handled by auth.js
 
 // auth.js will call onUserLoggedIn if a user is already signed in.
+
 
 
