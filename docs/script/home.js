@@ -22,7 +22,7 @@ let animatedFeatureCards;
  */
 function onUserLoggedIn(user) {
     currentUser = user;
-    console.log("Home page: User logged in. UID:", currentUser.uid, "Display Name:", user.displayName);
+    // console.log("Home page: User logged in. UID:", currentUser.uid, "Display Name:", user.displayName);
 
     // --- Assign DOM Element References here, ENSURING they exist ---
     welcomeMessage = document.getElementById('welcome-message');
@@ -49,7 +49,7 @@ function onUserLoggedIn(user) {
         try {
             // 'auth' object is global from firebase-auth-compat.js
             await auth.signOut(); 
-            console.log('User signed out successfully.');
+            // console.log('User signed out successfully.');
             // window.location.href = "index.html";
             // auth.js onAuthStateChanged listener handles redirection
         } catch (error) {
@@ -78,7 +78,7 @@ function onUserLoggedIn(user) {
 function createParticles() {
     particlesContainer = document.getElementById('particles'); // Assign here
     if (!particlesContainer) {
-        console.warn("Particles container not found.");
+        // console.warn("Particles container not found.");
         return;
     }
     particlesContainer.innerHTML = ''; // Clear existing particles if function called multiple times
@@ -167,7 +167,7 @@ async function fetchAndDisplayStats() {
         }
 
         const stats = await response.json();
-        console.log("Fetched user stats:", stats);
+        // console.log("Fetched user stats:", stats);
 
         // Update DOM elements with fetched data (add null checks for safety)
         if (statsRoadmapsP) statsRoadmapsP.textContent = stats.roadmaps_generated || "✨";
@@ -185,6 +185,7 @@ async function fetchAndDisplayStats() {
     }
 
 }
+
 
 
 
