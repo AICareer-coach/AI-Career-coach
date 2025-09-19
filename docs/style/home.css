@@ -351,4 +351,37 @@
         @media (max-width: 768px) {
             .dashboard-grid, .quick-stats { grid-template-columns: 1fr; }
         }
+
+/* --- CUSTOM DARK-THEME SCROLLBAR --- */
+
+/* For WebKit-based browsers (Chrome, Safari, Edge, etc.) */
+/* This targets all scrollbars on the page */
+*::-webkit-scrollbar {
+  width: 12px;  /* Width of the vertical scrollbar */
+  height: 12px; /* Height of the horizontal scrollbar */
+}
+
+/* The track (the background of the scrollbar) */
+*::-webkit-scrollbar-track {
+  background: var(--background); /* Use your main background color */
+}
+
+/* The thumb (the draggable part of the scrollbar) */
+*::-webkit-scrollbar-thumb {
+  background-color: var(--secondary);    /* A nice, visible grey from your theme */
+  border-radius: 20px;       /* Makes it fully rounded or "pill-shaped" */
+  border: 3px solid var(--background); /* Creates a padding effect around the thumb */
+}
+
+/* The thumb when you hover over it */
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary); /* Uses your primary accent color on hover */
+}
+
+/* For Firefox */
+/* This provides a simpler, but still effective, customization */
+html {
+  scrollbar-width: thin; /* Can be 'auto', 'thin', or 'none' */
+  scrollbar-color: var(--secondary) var(--background); /* thumb color, track color */
+}
     
