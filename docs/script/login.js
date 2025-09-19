@@ -27,7 +27,7 @@ const errorMessageDiv = document.getElementById('error-message');
 // --- Auth State Guard ---
 auth.onAuthStateChanged(user => {
     if (user) {
-        console.log("User is signed in, redirecting to home.");
+        // console.log("User is signed in, redirecting to home.");
         document.body.classList.add('auth-success');
         setTimeout(() => {
             window.location.href = 'home.html';
@@ -144,4 +144,5 @@ document.querySelectorAll('.toggle-password').forEach(toggle => {
     });
 
 });
+
 
