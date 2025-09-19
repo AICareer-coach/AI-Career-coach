@@ -64,7 +64,7 @@ let timelineChartInstance = null;
  */
 function onUserLoggedIn(user) {
   currentUser = user;
-  console.log("Roadmap page: User logged in. UID:", currentUser.uid);
+  // console.log("Roadmap page: User logged in. UID:", currentUser.uid);
   initializeEventListeners();
   loadOrCreateRoadmap();
   fetchAndAutofillSkills();
@@ -653,6 +653,7 @@ function appendTypingIndicator() {
   chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
   return el;
 }
+
 
 
 
