@@ -71,7 +71,6 @@ let skillBreakdownChartInstance = null;
 
 function onUserLoggedIn(user) {
     currentUser = user;
-    console.log("Assessment page: User logged in:", currentUser.uid);
 
     // Initial setup for the form
     initializeAssessmentSetupForm();
@@ -140,9 +139,9 @@ async function fetchAndAutofillSkills() {
             targetRoleInput.placeholder = predefinedAssessments.custom.targetRolePlaceholder;
         }
         
-        console.log('Skills autofilled from resume (if available).');
+        // console.log('Skills autofilled from resume (if available).');
     } catch (error) {
-        console.warn('Error fetching resume for autofill, user can still input manually:', error);
+        console.warn(error);
     }
 }
 
@@ -301,7 +300,7 @@ function captureAnswer() {
             userAnswers[currentQuestionIndex] = selectedOptions;
         }
     }
-    console.log("Answer for question", currentQuestionIndex + 1, ":", userAnswers[currentQuestionIndex]);
+    // console.log("Answer for question", currentQuestionIndex + 1, ":", userAnswers[currentQuestionIndex]);
 }
 
 async function handleNextQuestion() {
@@ -560,4 +559,5 @@ async function handleLogout() {
     }
 
 }
+
 
