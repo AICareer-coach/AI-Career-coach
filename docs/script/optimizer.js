@@ -77,7 +77,7 @@ let fetchedResumeContent = null;
 function onUserLoggedIn(user) {
     currentUser = user;
     currentResumeId = user.uid;
-    console.log("Optimizer page: User logged in. currentResumeId:", currentResumeId);
+    // console.log("Optimizer page: User logged in. currentResumeId:", currentResumeId);
 
     resetUI(); // Ensures a clean state and clears local storage job description
     fetchAndSuggestOptimizations();
@@ -101,7 +101,7 @@ function onUserLoggedIn(user) {
             try {
                 await firebase.auth().signOut();
                 localStorage.removeItem(JOB_DESCRIPTION_LOCAL_STORAGE_KEY); // NEW: Clear job description from local storage on logout
-                console.log('Job description cleared from local storage on logout.');
+                // console.log('Job description cleared from local storage on logout.');
             } catch (error) {
                 console.error("Error signing out:", error);
                 alert("Failed to log out. Please try again.");
@@ -111,8 +111,8 @@ function onUserLoggedIn(user) {
 
     // --- Custom File Input Listener with Debugging ---
     fileInput.addEventListener('change', (event) => { 
-        console.log('File input change event fired.');
-        console.log('fileInput.files:', fileInput.files); // Log the FileList object
+        // console.log('File input change event fired.');
+        // console.log('fileInput.files:', fileInput.files); // Log the FileList object
 
         if (fileInput.files.length > 0) {
             const selectedFile = fileInput.files[0];
@@ -122,7 +122,7 @@ function onUserLoggedIn(user) {
             console.log('Selected file size:', selectedFile.size, 'bytes');
         } else {
             fileNameSpan.textContent = 'No file chosen';
-            console.log('No file chosen.');
+            // console.log('No file chosen.');
         }
     });
 
@@ -146,7 +146,7 @@ function onUserLoggedIn(user) {
     const savedJobDescription = localStorage.getItem(JOB_DESCRIPTION_LOCAL_STORAGE_KEY);
     if (savedJobDescription) {
         jobDescriptionTextarea.value = savedJobDescription;
-        console.log('Populated job description from local storage on load:', savedJobDescription);
+        // console.log('Populated job description from local storage on load:', savedJobDescription);
     }
 }
 
@@ -166,7 +166,7 @@ function toggleFileUploadInput() {
 
         // Show saved resume info
         savedResumeDisplayDiv.classList.remove('hidden'); 
-        console.log("Using saved resume: File upload elements hidden, saved info shown.");
+        // console.log("Using saved resume: File upload elements hidden, saved info shown.");
         
         // Populate saved resume info if fetchedResumeContent is available
         if (fetchedResumeContent && fetchedResumeContent.resume_metadata) {
@@ -185,7 +185,7 @@ function toggleFileUploadInput() {
         savedResumeDisplayDiv.classList.add('hidden');
         savedResumeNameSpan.textContent = 'N/A'; 
         // savedResumeDateSpan.textContent = 'N/A'; 
-        console.log("Not using saved resume: File upload elements shown, saved info hidden.");
+        // console.log("Not using saved resume: File upload elements shown, saved info hidden.");
     }
     hideAllErrors();
 }
@@ -214,7 +214,7 @@ async function fetchAndSuggestOptimizations() {
         const data = await response.json();
 
         if (!response.ok) {
-            console.error('Failed to fetch profile/resume for suggestions:', data.detail || data.message);
+            // console.error('Failed to fetch profile/resume for suggestions:', data.detail || data.message);
             // Don't show error to user if no resume is found yet, it's a normal state.
             // showStatus(uploadErrorMessageDiv, 'Could not fetch resume for optimization suggestions. User can manually input requests.', true);
             fetchedResumeContent = null; // Ensure it's cleared if fetch fails
@@ -223,7 +223,7 @@ async function fetchAndSuggestOptimizations() {
 
         // Assuming data.resume_content now directly contains the structured resume data
         fetchedResumeContent = data.resume_content; 
-        console.log('Resume content fetched for optimization suggestions:', fetchedResumeContent);
+        // console.log('Resume content fetched for optimization suggestions:', fetchedResumeContent);
 
         // Update placeholders based on fetched content
         const summary = fetchedResumeContent ? fetchedResumeContent.summary : '';
@@ -272,7 +272,7 @@ function resetUI() {
 
   jobDescriptionTextarea.value = ''; // Ensure input is cleared visually
   localStorage.removeItem(JOB_DESCRIPTION_LOCAL_STORAGE_KEY); // NEW: Clear job description from local storage
-  console.log('Job description cleared from local storage during reset.');
+  // console.log('Job description cleared from local storage during reset.');
 
 
   // Clear Full Analysis Report displays
@@ -315,7 +315,7 @@ uploadForm.addEventListener("submit", async (e) => {
   console.log('useSavedResume:', useSavedResume);
   console.log('file present:', !!file);
   if (file) {
-      console.log('File details for submission:', file.name, file.type, file.size);
+      console.log('File details for submission);
   }
 
 
@@ -337,7 +337,7 @@ uploadForm.addEventListener("submit", async (e) => {
 
   try {
     const idToken = await currentUser.getIdToken();
-    console.log("Optimizer Upload: Sending ID Token:", idToken);
+    // console.log("Optimizer Upload: Sending ID Token:", idToken);
 
     const formData = new FormData();
     if (!useSavedResume && file) { 
@@ -373,10 +373,10 @@ uploadForm.addEventListener("submit", async (e) => {
     // NEW: Save job description to local storage after successful analysis
     if (jobDescription) {
         localStorage.setItem(JOB_DESCRIPTION_LOCAL_STORAGE_KEY, jobDescription);
-        console.log('Job description saved to local storage:', jobDescription);
+        // console.log('Job description saved to local storage:', jobDescription);
     } else {
         localStorage.removeItem(JOB_DESCRIPTION_LOCAL_STORAGE_KEY);
-        console.log('No job description provided, cleared from local storage.');
+        // console.log('No job description provided, cleared from local storage.');
     }
 
   } catch (error) {
@@ -476,7 +476,7 @@ resumeOptimizeForm.addEventListener("submit", async (e) => {
 
   const userRequest = resumeUserRequestTextarea.value;
   const jobDescriptionContext = localStorage.getItem(JOB_DESCRIPTION_LOCAL_STORAGE_KEY); // NEW: Get job description from local storage
-  console.log('Resume Optimization: Using Job Description from local storage:', jobDescriptionContext);
+  // console.log('Resume Optimization: Using Job Description from local storage:', jobDescriptionContext);
 
   const requestBody = { 
       user_request: userRequest,
@@ -487,7 +487,7 @@ resumeOptimizeForm.addEventListener("submit", async (e) => {
   setButtonLoading(button, true, "Optimizing...");
   try {
     const idToken = await currentUser.getIdToken();
-    console.log("Optimize: Sending ID Token:", idToken);
+    // console.log("Optimize: Sending ID Token:", idToken);
 
     const optimizeResponse = await fetch(`${API_BASE_URL}/api/resume/optimize`, {
       method: "POST",
@@ -507,8 +507,8 @@ resumeOptimizeForm.addEventListener("submit", async (e) => {
         showStatus(resumeOptimizerErrorMessageDiv, 'Download starting...', false);
         const downloadUrl = `${API_BASE_URL}${optimizeData.download_url}`;
 
-        console.log("Download: Making authenticated fetch for URL:", downloadUrl);
-        console.log("Download: Using ID Token for GET request:", idToken);
+        // console.log("Download: Making authenticated fetch for URL:", downloadUrl);
+        // console.log("Download: Using ID Token for GET request:", idToken);
 
         const downloadResponse = await fetch(downloadUrl, {
             method: 'GET',
@@ -573,7 +573,7 @@ linkedinOptimizeForm.addEventListener("submit", async (e) => {
 
   const userRequest = linkedinUserRequestTextarea.value;
   const jobDescriptionContext = localStorage.getItem(JOB_DESCRIPTION_LOCAL_STORAGE_KEY); // NEW: Get job description from local storage
-  console.log('LinkedIn Optimization: Using Job Description from local storage:', jobDescriptionContext);
+  // console.log('LinkedIn Optimization: Using Job Description from local storage:', jobDescriptionContext);
 
   const requestBody = { 
       user_request: userRequest,
@@ -585,7 +585,7 @@ linkedinOptimizeForm.addEventListener("submit", async (e) => {
   linkedinContentDiv.innerHTML = '<div class="spinner"></div>';
   try {
     const idToken = await currentUser.getIdToken();
-    console.log("LinkedIn Optimize: Sending ID Token:", idToken);
+    // console.log("LinkedIn Optimize: Sending ID Token:", idToken);
 
     const response = await fetch(
       `${API_BASE_URL}/api/resume/linkedin-optimize`,
@@ -672,7 +672,7 @@ function showStatus(targetDiv, message, isError = false) {
         targetDiv.className = isError ? 'status-message error' : 'status-message success';
         targetDiv.classList.remove("hidden");
     } else {
-        console.error("Error: targetDiv for status message is null or undefined.", message);
+        // console.error("Error: targetDiv for status message is null or undefined.", message);
         alert(`Status Message Error: ${message}`);
     }
 }
@@ -698,5 +698,6 @@ function hideAllErrors() {
 // Initial check for user authentication state is handled by auth.js
 
 // auth.js will call onUserLoggedIn if a user is already signed in.
+
 
 
