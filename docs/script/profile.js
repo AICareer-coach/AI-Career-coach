@@ -200,6 +200,7 @@ function populateResumeFields(resumeContent = {}) {
   } else {
     addProjectEntry(); // Add one empty entry if none exist
   }
+    const savedFilename = resumeContent?.resume_metadata?.file_name;
 }
 
 /**
@@ -271,6 +272,7 @@ async function handleSaveDetails(e) {
     skills: { "Core Skills": skillsList },
     projects: projectsList,
   };
+    const originalFilename = originalResumeData?.resume_metadata?.file_name;
 
   try {
     const idToken = await currentUser.getIdToken();
@@ -282,7 +284,7 @@ async function handleSaveDetails(e) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${idToken}`,
         },
-        body: JSON.stringify({ parsed_data: updatedResumeData }),
+        body: JSON.stringify({ parsed_data: updatedResumeData, file_name: originalFilename }),
       }
     );
     const result = await response.json();
@@ -376,20 +378,23 @@ function addProjectEntry(project = { title: "", description: "" }) {
     ? project.description.join(" ")
     : project.description;
 
+  const isCurrentlyDisabled = saveBtn.classList.contains("hidden");
+  const disabledAttribute = isCurrentlyDisabled ? "disabled" : "";
+  
   entry.innerHTML = `
         <div class="form-group">
             <label>Project Title:</label>
             <input type="text" class="project-title" value="${
               project.title || ""
-            }" placeholder="e.g., AI Career Coach" disabled>
+            }" placeholder="e.g., AI Career Coach" ${disabledAttribute}>
         </div>
         <div class="form-group">
             <label>Project Description:</label>
-            <textarea class="project-description" rows="3" placeholder="Describe the project..." disabled>${
+            <textarea class="project-description" rows="3" placeholder="Describe the project..." ${disabledAttribute}>${
               descText || ""
             }</textarea>
         </div>
-        <button type="button" class="btn-remove-project hidden" onclick="this.parentElement.remove()"><i class="fas fa-trash-alt"></i></button>
+        <button type="button" class="btn-remove-project" onclick="this.parentElement.remove()"><i class="fas fa-trash-alt"></i></button>
     `;
   projectsContainer.appendChild(entry);
 }
@@ -410,6 +415,7 @@ async function handleLogout() {
     console.error("Error signing out:", error);
   }
 }
+
 
 
 
