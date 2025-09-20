@@ -170,9 +170,14 @@ async function fetchAndAutofillSkills() {
         .join(", ")}\n`;
     }
     if (content?.projects?.length) {
-      autofill += `Projects: ${content.projects
-        .map((p) => p.title)
-        .join(", ")}`;
+  autofill += `Projects: ${content.projects
+    .map((p) => {
+        // Join the description array into a single string if it exists
+        const description = Array.isArray(p.description) ? p.description.join(' ') : p.description;
+        // Return a formatted string with both title and description
+        return `${p.title} - ${description || 'No description'}`;
+    })
+    .join("\n")}`; // Use a semicolon to better separate full project entries
     }
     currentSkillsInput.value = autofill;
   } catch (error) {
@@ -653,6 +658,7 @@ function appendTypingIndicator() {
   chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
   return el;
 }
+
 
 
 
