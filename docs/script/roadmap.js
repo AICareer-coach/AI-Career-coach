@@ -333,7 +333,7 @@ function renderInteractiveRoadmap(detailedRoadmap) {
         .map(
           (phase) => `
             <div class="roadmap-phase card">
-                <h4>${phase.phase_title} (${phase.phase_duration} )</h4>
+                <h4>${phase.phase_title} (${phase.phase_duration} weeks )</h4>
                 <ul class="task-list">
                     ${(phase.topics || [])
                       .map(
@@ -658,6 +658,7 @@ function appendTypingIndicator() {
   chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
   return el;
 }
+
 
 
 
