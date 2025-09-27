@@ -1,4 +1,5 @@
 const API_BASE_URL = 'https://ai-career-coach-backend-amp9.onrender.com';
+
 let currentUser = null;
 let originalResumeData = {}; // To store the initial state for the "Cancel" button
 
@@ -128,7 +129,7 @@ function setupEventListeners() {
     toggleEditMode(false);
   });
 
-  editDetailsForm.addEventListener("submit", handleSaveDetails);
+  saveBtn.addEventListener("click", handleSaveDetails);
   uploadResumeFileForm.addEventListener("submit", handleResumeUpload);
 
   resumeFileInput.addEventListener("change", () => {
@@ -200,6 +201,7 @@ function populateResumeFields(resumeContent = {}) {
   } else {
     addProjectEntry(); // Add one empty entry if none exist
   }
+
     const savedFilename = resumeContent?.resume_metadata?.file_name;
 }
 
@@ -246,7 +248,29 @@ function toggleEditMode(isEditing) {
  */
 async function handleSaveDetails(e) {
   e.preventDefault();
-  showStatus(detailsUpdateStatusDiv, "Saving...", false);
+    // --- ⬇️ START: Manual Validation ---
+  const validationResult = validateForm();
+  if (!validationResult.isValid) {
+    // Show the error message
+    showStatus(detailsUpdateStatusDiv, validationResult.message, true);
+
+    // Find the tab link that needs to be activated
+    const tabToSwitch = document.querySelector(
+      `.tab-link[data-tab='${validationResult.tabId}']`
+    );
+    if (tabToSwitch) {
+      switchTab(tabToSwitch);
+    }
+    // Focus on the problematic field
+    document.getElementById(validationResult.fieldId).focus();
+    
+    return; // Stop the function here
+  }
+
+  // --- ⬇️ START: Add loading state to the button ---
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = `Saving... <i class="fas fa-spinner fa-spin"></i>`;
+  // --- ⬆️ END: Add loading state to the button ---
 
   // Gather data from dynamic fields
   const skillsList = [...skillsContainer.querySelectorAll(".skill-tag")].map(
@@ -268,11 +292,11 @@ async function handleSaveDetails(e) {
       github: document.getElementById("profileGithub").value.trim(),
     },
     summary: document.getElementById("profileSummary").value.trim(),
-    // AI will categorize skills, so we send them in a single bucket
     skills: { "Core Skills": skillsList },
     projects: projectsList,
   };
-    const originalFilename = originalResumeData?.resume_metadata?.file_name;
+
+  const originalFilename = originalResumeData?.resume_metadata?.file_name;
 
   try {
     const idToken = await currentUser.getIdToken();
@@ -294,11 +318,61 @@ async function handleSaveDetails(e) {
     showStatus(detailsUpdateStatusDiv, "Details updated successfully!", false);
     originalResumeData = JSON.parse(JSON.stringify(updatedResumeData)); // Update the original state
     toggleEditMode(false);
+
   } catch (error) {
     showStatus(detailsUpdateStatusDiv, error.message, true);
+
+  } finally {
+    // --- ⬇️ START: Always restore the button ---
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = 'Save Changes';
+    // --- ⬆️ END: Always restore the button ---
   }
 }
 
+/**
+ * Validates form fields and identifies the first error.
+ * @returns {object} An object with validation status.
+ */
+function validateForm() {
+  // Check Personal Info tab
+  const name = document.getElementById("profileName").value.trim();
+  const linkedin = document.getElementById("profileLinkedin").value.trim();
+  const github = document.getElementById("profileGithub").value.trim();
+
+  if (!name) {
+    return {
+      isValid: false,
+      fieldId: "profileName",
+      tabId: "tab-personal", // The ID of the tab pane
+      message: "Your name is required.",
+    };
+  }
+
+  // Simple URL validation for LinkedIn
+  if (linkedin && !linkedin.toLowerCase().includes("linkedin.com")) {
+    return {
+      isValid: false,
+      fieldId: "profileLinkedin",
+      tabId: "tab-personal",
+      message: "Please enter a valid LinkedIn profile URL.",
+    };
+  }
+
+  // Simple URL validation for GitHub
+  if (github && !github.toLowerCase().includes("github.com")) {
+    return {
+      isValid: false,
+      fieldId: "profileGithub",
+      tabId: "tab-personal",
+      message: "Please enter a valid GitHub profile URL.",
+    };
+  }
+  
+  // Add more checks for other fields/tabs if needed...
+
+  return { isValid: true };
+}
 /**
  * Handles the upload of a new resume file with confirmation.
  */
@@ -316,9 +390,15 @@ async function handleResumeUpload(e) {
     return;
   }
 
+  // --- ⬇️ START: Add loading state to the upload button ---
+  uploadResumeFileButton.disabled = true;
+  uploadResumeFileButton.innerHTML = `Uploading... <i class="fas fa-spinner fa-spin"></i>`;
+  // --- ⬆️ END: Add loading state to the upload button ---
+
   showStatus(fileUploadStatusDiv, "Uploading and processing...", false);
   const formData = new FormData();
   formData.append("file", resumeFileInput.files[0]);
+  formData.append("skip_analysis", "true");
 
   try {
     const idToken = await currentUser.getIdToken();
@@ -338,8 +418,16 @@ async function handleResumeUpload(e) {
     resumeFileInput.value = "";
     fileNameDisplay.textContent = "No file chosen";
     await fetchAndDisplayResume(); // Refresh all data
+
   } catch (error) {
     showStatus(fileUploadStatusDiv, error.message, true);
+
+  } finally {
+    // --- ⬇️ START: Always restore the upload button ---
+    uploadResumeFileButton.disabled = false;
+    // Assuming the original text was "Upload & Replace"
+    uploadResumeFileButton.innerHTML = 'Upload & Replace'; 
+    // --- ⬆️ END: Always restore the upload button ---
   }
 }
 
@@ -380,7 +468,7 @@ function addProjectEntry(project = { title: "", description: "" }) {
 
   const isCurrentlyDisabled = saveBtn.classList.contains("hidden");
   const disabledAttribute = isCurrentlyDisabled ? "disabled" : "";
-  
+
   entry.innerHTML = `
         <div class="form-group">
             <label>Project Title:</label>
@@ -415,6 +503,7 @@ async function handleLogout() {
     console.error("Error signing out:", error);
   }
 }
+
 
 
 
