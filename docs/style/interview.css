@@ -491,7 +491,7 @@ html {
 
 #end-interview-btn {
     width: 100%;
-    margin-top: 70%; /* Pushes it to the bottom */
+    margin-top: auto; /* Pushes it to the bottom */
     padding-top: 1rem; /* Adds space above it */
 }
 @keyframes pulseRec {
@@ -570,3 +570,4 @@ html {
     content: "\f057"; /* times-circle icon */
     color: var(--danger);
 }
+
