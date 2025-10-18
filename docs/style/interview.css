@@ -150,6 +150,10 @@ textarea:focus, #chat-input:focus {
     transition: all 0.2s ease-in-out;
     border: none;
 }
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
 .primary-btn {
     background: linear-gradient(90deg, var(--primary), var(--primary-hover));
     color: white;
@@ -164,7 +168,7 @@ textarea:focus, #chat-input:focus {
     border: 1px solid var(--border-color);
     color: var(--text-light);
 }
-.secondary-btn:hover {
+.secondary-btn:hover:not(:disabled) {
     background-color: var(--bg-main);
     border-color: var(--primary);
 }
@@ -198,11 +202,16 @@ textarea:focus, #chat-input:focus {
     box-shadow: var(--shadow);
     border-color: var(--primary);
 }
+.difficulty-btn.selected {
+    border-color: var(--primary);
+    box-shadow: 0 0 15px rgba(138, 73, 255, 0.3);
+    transform: translateY(-5px);
+}
 .difficulty-btn h4 { font-size: 1.25rem; margin-bottom: 0.5rem; }
 .difficulty-btn p { font-size: 0.9rem; color: var(--text-muted); margin: 0; }
-#easy-btn:hover { border-color: var(--success); }
-#medium-btn:hover { border-color: var(--warning); }
-#hard-btn:hover { border-color: var(--danger); }
+.difficulty-btn[data-difficulty="easy"].selected { border-color: var(--success); }
+.difficulty-btn[data-difficulty="medium"].selected { border-color: var(--warning); }
+.difficulty-btn[data-difficulty="hard"].selected { border-color: var(--danger); }
 
 /* --- Chat Interface --- */
 .chat-header { text-align: center; }
@@ -254,10 +263,25 @@ textarea:focus, #chat-input:focus {
     color: var(--text-light);
     border-bottom-left-radius: 4px;
 }
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 0;
+}
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background-color: var(--text-muted);
+    border-radius: 50%;
+    animation: typing-bounce 1.4s infinite both;
+}
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
 .chat-input-area { display: flex; gap: 1rem; }
 #chat-input { flex-grow: 1; }
 #send-chat-btn { width: auto; flex-shrink: 0; }
-#end-interview-btn { width: auto; flex-shrink: 0; }
 
 /* --- Summary Card --- */
 #summary-content h3 {
@@ -292,6 +316,26 @@ textarea:focus, #chat-input:focus {
     content: "\f06a"; /* exclamation-circle */
     color: var(--warning);
 }
+.termination-notice {
+    text-align: center;
+    padding: 2rem;
+    background-color: rgba(220, 53, 69, 0.1);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius);
+    margin-bottom: 2rem;
+}
+.termination-notice i {
+    font-size: 3rem;
+    color: var(--danger);
+    margin-bottom: 1rem;
+}
+.termination-notice h3 {
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+}
+.termination-notice p {
+    color: var(--text-muted);
+}
 #overall-feedback {
     margin-top: 1.5rem;
     background-color: var(--bg-main);
@@ -300,10 +344,51 @@ textarea:focus, #chat-input:focus {
 }
 
 
-/* --- Spinner --- */
-.spinner-container { display: flex; justify-content: center; padding: 20px 0; }
-.spinner {
-    width: 40px; height: 40px;
+/* --- Full Screen Spinner Overlay --- */
+#spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(11, 10, 16, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    z-index: 2000;
+    transition: opacity 0.3s ease;
+}
+#spinner-overlay .spinner {
+    width: 50px; 
+    height: 50px;
+    border: 5px solid var(--secondary);
+    border-top: 5px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* --- Loader Text Style --- */
+.loader-text {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* --- Local Spinner for Video Interface --- */
+.video-interface .spinner-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1.5rem;
+    gap: 0.75rem;
+}
+.video-interface .spinner {
+    width: 40px;
+    height: 40px;
     border: 4px solid var(--secondary);
     border-top: 4px solid var(--primary);
     border-radius: 50%;
@@ -318,155 +403,52 @@ textarea:focus, #chat-input:focus {
   50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.05); }
   100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
 }
+@keyframes typing-bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1.0); }
+}
+
 .chat-messages::-webkit-scrollbar { width: 8px; }
 .chat-messages::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
 .chat-messages::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 10px; border: 2px solid var(--bg-main); }
 .chat-messages::-webkit-scrollbar-thumb:hover { background-color: var(--primary-hover); }
 
-
 /* --- CUSTOM DARK-THEME SCROLLBAR --- */
-
-/* For WebKit-based browsers (Chrome, Safari, Edge, etc.) */
-/* This targets all scrollbars on the page */
 *::-webkit-scrollbar {
-  width: 12px;  /* Width of the vertical scrollbar */
-  height: 12px; /* Height of the horizontal scrollbar */
+  width: 12px;
+  height: 12px;
 }
-
-/* The track (the background of the scrollbar) */
 *::-webkit-scrollbar-track {
-  background: var(--background); /* Use your main background color */
+  background: var(--bg-main);
 }
-
-/* The thumb (the draggable part of the scrollbar) */
 *::-webkit-scrollbar-thumb {
-  background-color: var(--secondary);    /* A nice, visible grey from your theme */
-  border-radius: 20px;       /* Makes it fully rounded or "pill-shaped" */
-  border: 3px solid var(--background); /* Creates a padding effect around the thumb */
+  background-color: var(--secondary);
+  border-radius: 20px;
+  border: 3px solid var(--bg-main);
 }
-
-/* The thumb when you hover over it */
 *::-webkit-scrollbar-thumb:hover {
-  background-color: var(--primary); /* Uses your primary accent color on hover */
+  background-color: var(--primary);
 }
-
-/* For Firefox */
-/* This provides a simpler, but still effective, customization */
 html {
-  scrollbar-width: thin; /* Can be 'auto', 'thin', or 'none' */
-  scrollbar-color: var(--secondary) var(--background); /* thumb color, track color */
+  scrollbar-width: thin;
+  scrollbar-color: var(--secondary) var(--bg-main);
 }
 
-/* --- NEW STYLES FOR VIDEO INTERVIEW LAYOUT --- */
-
-/* This makes the main card a positioning container for the video feed */
+/* --- VIDEO INTERVIEW LAYOUT --- */
 #interview-card {
     position: relative;
-    padding-top: 2.5rem;
+    padding-top: 1.5rem;
 }
-
-.video-interface {
-    width: 280px; /* Width of the video panel */
-    position: absolute;
-    top: 2.5rem;  /* Match card padding */
-    right: 2.5rem; /* Match card padding */
-    z-index: 10;
-}
-
-.video-container {
-    width: 100%;
-    aspect-ratio: 4 / 3; /* Maintain a 4:3 video ratio */
-    background-color: #000;
-    border-radius: 12px;
-    overflow: hidden;
-    position: relative;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-}
-
-#video-preview {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Ensures video fills the container */
-}
-
-#recording-indicator {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background-color: rgba(220, 53, 69, 0.8);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    animation: pulseRec 1.5s infinite;
-}
-
-.video-controls {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
-}
-
-.video-controls .btn {
-    flex-grow: 1; /* Make buttons fill the space */
-    padding: 0.7rem 1rem;
-}
-
-/* Adjust the main dialogue area to not overlap with the video feed */
-.interview-dialogue {
-    padding-right: 320px; /* Video width (280px) + 40px gap */
-}
-
-.main-controls {
-    margin-top: 2rem;
-    padding-right: 320px; /* Align the main end button with the dialogue */
-}
-
-
-/* --- Responsive styles for smaller screens --- */
-@media (max-width: 950px) {
-    .video-interface {
-        position: static; /* Un-stick the video */
-        width: 100%;      /* Make it full width */
-        margin-bottom: 2rem;
-    }
-
-    .interview-dialogue {
-        padding-right: 0; /* Remove the padding */
-    }
-
-    .main-controls {
-        padding-right: 0;
-    }
-
-    .interview-container {
-        padding: 1.5rem;
-    }
-}
-
-@keyframes pulseRec {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
-}
-
-/* --- NEW STYLES FOR VIDEO INTERVIEW LAYOUT --- */
-
-#interview-card {
-    position: relative;
-    padding-top: 2.5rem;
-}
-
 .video-interface {
     width: 280px;
     position: absolute;
     top: 2.5rem;
     right: 2.5rem;
     z-index: 10;
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 5rem); /* Match card padding */
 }
-
 .video-container {
     width: 100%;
     aspect-ratio: 4 / 3;
@@ -477,13 +459,11 @@ html {
     border: 1px solid var(--border-color);
     box-shadow: 0 8px 24px rgba(0,0,0,0.5);
 }
-
 #video-preview {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
-
 #recording-indicator {
     position: absolute;
     top: 10px;
@@ -496,43 +476,46 @@ html {
     font-weight: 600;
     animation: pulseRec 1.5s infinite;
 }
-
 .video-controls {
     display: flex;
     gap: 0.5rem;
     margin-top: 1rem;
 }
-
 .video-controls .btn {
     flex-grow: 1;
     padding: 0.7rem 1rem;
 }
-
 .interview-dialogue {
     padding-right: 320px;
 }
 
-.main-controls {
-    margin-top: 2rem;
-    padding-right: 320px;
+#end-interview-btn {
+    width: 100%;
+    margin-top: 70%; /* Pushes it to the bottom */
+    padding-top: 1rem; /* Adds space above it */
+}
+@keyframes pulseRec {
+    0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; }
 }
 
+/* --- Responsive styles for smaller screens --- */
 @media (max-width: 950px) {
     .video-interface {
         position: static;
         width: 100%;
         margin-bottom: 2rem;
+        height: auto; /* Reset height for static layout */
     }
-    .interview-dialogue, .main-controls {
+    .interview-dialogue {
         padding-right: 0;
     }
+    #end-interview-btn {
+        margin-top: 1.5rem;
+        padding-top: 0;
+    }
 }
 
-@keyframes pulseRec {
-    0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; }
-}
-
-/* --- NEW: Toast Notification Styles --- */
+/* --- Toast Notification Styles --- */
 .toast {
     position: fixed;
     top: -100px; /* Start off-screen */
@@ -544,28 +527,46 @@ html {
     color: var(--text-light);
     border: 1px solid var(--border-color);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    z-index: 3000; /* Increased z-index to appear above the spinner overlay */
     font-weight: 500;
     transition: top 0.5s ease-in-out;
     display: flex;
     align-items: center;
     gap: 0.75rem;
 }
-
 .toast.show {
     top: 20px; /* Slide into view */
 }
-
-/* Style for warning toasts */
+.toast.success {
+    background-color: #0d3d17;
+    border-color: var(--success);
+    color: #d4edda;
+}
+.toast.success::before {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    content: "\f058"; /* check-circle icon */
+    color: var(--success);
+}
 .toast.warning {
     background-color: #4d3800;
     border-color: var(--warning);
     color: #ffeeba;
 }
-
 .toast.warning::before {
     font-family: "Font Awesome 6 Free";
     font-weight: 900;
     content: "\f071"; /* exclamation-triangle icon */
     color: var(--warning);
+}
+.toast.danger {
+    background-color: #441217;
+    border-color: var(--danger);
+    color: #f5c6cb;
+}
+.toast.danger::before {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    content: "\f057"; /* times-circle icon */
+    color: var(--danger);
 }
