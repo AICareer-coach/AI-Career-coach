@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>`;
         chatMessagesContainer.appendChild(typingMessage);
-        chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+        // chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     };
 
     const hideTypingIndicator = () => {
@@ -104,9 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
         messageRow.appendChild(message);
         chatMessagesContainer.appendChild(messageRow);
         
-        setTimeout(() => {
-            messageRow.scrollIntoView({ behavior: "smooth", block: "end" });
-        }, 100);
+        // setTimeout(() => {
+        //     messageRow.scrollIntoView({ behavior: "smooth", block: "end" });
+        // }, 100);
     };
 
     // --- Central Warning & Termination Logic ---
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         totalWarnings++;
         showToast(`Warning ${totalWarnings}/${MAX_WARNINGS}: ${detail}`, 'warning');
         proctoringAlertCooldown = true;
-        setTimeout(() => { proctoringAlertCooldown = false; }, 15000);
+        setTimeout(() => { proctoringAlertCooldown = false; }, 7000);
         
         if (totalWarnings >= MAX_WARNINGS) {
             forceEndInterview(`Exceeded maximum warnings (${reason})`);
@@ -384,3 +384,4 @@ document.addEventListener('DOMContentLoaded', () => {
         firebase.auth().signOut().catch(error => console.error("Error signing out:", error));
     });
 });
+
