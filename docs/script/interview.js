@@ -1,140 +1,288 @@
 const API_BASE_URL = 'https://ai-career-coach-backend-amp9.onrender.com';
 
-
 document.addEventListener('DOMContentLoaded', () => {
-    // This now correctly uses the base URL defined above
     const API_URL = `${API_BASE_URL}/api/interview`;
 
-    // Views
-    const level1Card = document.getElementById('level-1-card');
+    // --- DOM Element References ---
+    const jobDescriptionCard = document.getElementById('job-description-card');
     const difficultyCard = document.getElementById('difficulty-card');
-    const chatCard = document.getElementById('chat-card');
+    const startPromptCard = document.getElementById('start-prompt-card');
+    const interviewCard = document.getElementById('interview-card');
     const summaryCard = document.getElementById('summary-card');
     const spinner = document.getElementById('spinner-container');
-
-    // Step 1 Elements
-    const analyzeBtn = document.getElementById('analyze-btn');
+    const proceedToDifficultyBtn = document.getElementById('proceed-to-difficulty-btn');
     const jobDescriptionInput = document.getElementById('job-description-input');
-    
-    // Step 2 Elements
     const difficultyButtons = document.querySelectorAll('.difficulty-btn');
-
-    // Step 3 Elements
-    const chatHeaderTitle = document.getElementById('chat-header-title');
-    const chatMessagesContainer = document.getElementById('chat-messages');
-    const chatInput = document.getElementById('chat-input');
-    const sendChatBtn = document.getElementById('send-chat-btn');
+    const startInterviewBtn = document.getElementById('start-interview-btn');
+    const recordBtn = document.getElementById('record-btn');
+    const stopBtn = document.getElementById('stop-btn');
     const endInterviewBtn = document.getElementById('end-interview-btn');
-
-    // Step 4 Elements
-    const summaryContent = document.getElementById('summary-content');
     const restartInterviewBtn = document.getElementById('restart-interview-btn');
+    const confirmationDetails = document.getElementById('confirmation-details');
+    const interviewHeaderTitle = document.getElementById('interview-header-title');
+    const chatMessagesContainer = document.getElementById('chat-messages');
+    const videoPreview = document.getElementById('video-preview');
+    const recordingIndicator = document.getElementById('recording-indicator');
+    const summaryContent = document.getElementById('summary-content');
+    const toastNotification = document.getElementById('toast-notification');
+    const alertSound = new Audio('./assets/alert.mp3');
     
-    // App State
+    // --- Application State ---
     let jobDescription = '';
+    let selectedDifficulty = 'medium';
     let chatHistory = [];
-    let selectedDifficulty = 'medium'; // Default
+    let currentQuestion = '';
+    let mediaRecorder;
+    let recordedChunks = [];
+
+    // --- PROCTORING STATE ---
+    let totalWarnings = 0;
+    const MAX_WARNINGS = 3;
+    let tabSwitchCount = 0;
+    let phoneDetectionCount = 0;
+    let noPersonWarningCount = 0;
+    let multiplePeopleWarningCount = 0;
+    let isInterviewActive = false;
+    let objectDetectionModel = null;
+    let proctoringAlertCooldown = false;
 
     // --- Helper Functions ---
     const showSpinner = () => spinner.style.display = 'flex';
     const hideSpinner = () => spinner.style.display = 'none';
 
+    const showToast = (message, type = 'info') => {
+        toastNotification.textContent = message;
+        toastNotification.className = `toast show ${type}`;
+        alertSound.play().catch(e => console.warn("Audio play failed:", e));
+        setTimeout(() => { toastNotification.className = toastNotification.className.replace('show', ''); }, 5000);
+    };
+
     const addMessageToChat = (role, content) => {
         const isAI = role === 'model';
-        const row = document.createElement('div');
-        row.classList.add('message-row', isAI ? 'ai' : 'user');
+        const messageRow = document.createElement('div');
+        messageRow.className = `message-row ${isAI ? 'ai' : 'user'}`;
         const avatar = document.createElement('div');
-        avatar.classList.add('avatar', isAI ? 'ai' : 'user');
+        avatar.className = `avatar ${isAI ? 'ai' : 'user'}`;
         const message = document.createElement('div');
-        message.classList.add('message', isAI ? 'ai-message' : 'user-message');
+        message.className = `message ${isAI ? 'ai-message' : 'user-message'}`;
         message.innerHTML = content.replace(/\n/g, '<br>');
-
-        if (isAI) {
-            row.appendChild(avatar);
-            row.appendChild(message);
-        } else {
-            row.appendChild(message);
-            row.appendChild(avatar);
-        }
-
-        chatMessagesContainer.appendChild(row);
+        messageRow.appendChild(avatar);
+        messageRow.appendChild(message);
+        chatMessagesContainer.appendChild(messageRow);
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     };
 
-    // --- Step 1: Analyze Job Description ---
-    analyzeBtn.addEventListener('click', () => {
-        jobDescription = jobDescriptionInput.value;
-        if (!jobDescription.trim()) {
-            alert('Please provide a job description.');
-            return;
+    // --- NEW: Central Warning & Termination Logic ---
+    const handleWarning = (reason) => {
+        if (!isInterviewActive || proctoringAlertCooldown) return;
+
+        totalWarnings++;
+        showToast(`Warning ${totalWarnings}/${MAX_WARNINGS}: ${reason}`, 'warning');
+        proctoringAlertCooldown = true;
+        setTimeout(() => { proctoringAlertCooldown = false; }, 15000); // 15s global cooldown
+        
+        if (totalWarnings >= MAX_WARNINGS) {
+            forceEndInterview(`Multiple warnings (${reason})`);
         }
-        level1Card.style.display = 'none';
+    };
+
+    const forceEndInterview = (reason) => {
+        if (!isInterviewActive) return; // Prevent this from running multiple times
+        
+        isInterviewActive = false; // Stop all proctoring loops immediately
+        showToast("Interview terminated due to multiple malpractice warnings.", 'danger');
+        
+        if (mediaRecorder?.state === 'recording') {
+            mediaRecorder.stop();
+        }
+        if (videoPreview.srcObject) {
+            videoPreview.srcObject.getTracks().forEach(track => track.stop());
+        }
+
+        interviewCard.style.display = 'none';
+        generateSummary({ termination_reason: reason });
+    };
+
+    // --- PROCTORING LOGIC ---
+    document.addEventListener('visibilitychange', () => {
+        if (isInterviewActive && document.visibilityState === 'hidden') {
+            tabSwitchCount++;
+            handleWarning("Tab Switching");
+        }
+    });
+
+    const runObjectDetection = async () => {
+        if (!isInterviewActive || !objectDetectionModel) return;
+
+        const predictions = await objectDetectionModel.detect(videoPreview);
+        let personCount = 0, phoneDetected = false;
+        for (let p of predictions) {
+            if (p.class === 'person' && p.score > 0.6) personCount++;
+            if (p.class === 'cell phone' && p.score > 0.65) phoneDetected = true;
+        }
+
+        // The handleWarning function now contains the cooldown logic
+        if (phoneDetected) {
+            phoneDetectionCount++;
+            handleWarning("Phone Usage");
+        } else if (personCount === 0) {
+            noPersonWarningCount++;
+            handleWarning("No Person Detected");
+        } else if (personCount > 1) {
+            multiplePeopleWarningCount++;
+            handleWarning("Multiple People Detected");
+        }
+
+        requestAnimationFrame(runObjectDetection);
+    };
+
+    // --- Core Workflow ---
+    proceedToDifficultyBtn.addEventListener('click', () => {
+        jobDescription = jobDescriptionInput.value;
+        if (!jobDescription.trim()) return alert('Please provide a job description.');
+        jobDescriptionCard.style.display = 'none';
         difficultyCard.style.display = 'block';
     });
 
-    // --- Step 2: Select Difficulty and Start Interview ---
     difficultyButtons.forEach(button => {
-        button.addEventListener('click', async () => {
+        button.addEventListener('click', () => {
             selectedDifficulty = button.dataset.difficulty;
             difficultyCard.style.display = 'none';
-            chatCard.style.display = 'block';
-            chatHeaderTitle.textContent = `AI Mock Interview (${selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1)})`;
-            await startInterview();
+            confirmationDetails.innerHTML = `<p><strong>Difficulty:</strong> ${selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1)}</p>`;
+            startPromptCard.style.display = 'block';
         });
     });
 
-    // --- Step 3: The Interview Chat Logic ---
-    const startInterview = async () => {
-        chatHistory = [];
-        const firstUserMessage = "Let's begin the interview.";
-        addMessageToChat('user', firstUserMessage);
-        chatHistory.push({ role: 'user', content: firstUserMessage });
-        await getAiResponse();
-    };
-    
-    const getAiResponse = async () => {
+    startInterviewBtn.addEventListener('click', async () => {
+        startPromptCard.style.display = 'none';
         showSpinner();
+        
+        if (!objectDetectionModel) {
+            showToast("Initializing proctoring AI...");
+            try { objectDetectionModel = await cocoSsd.load(); } 
+            catch (e) { console.error("Failed to load model:", e); }
+        }
+        
+        const hasCamera = await setupCameraAndRecorder();
+        if (!hasCamera) {
+            hideSpinner();
+            alert("Camera and microphone access is required.");
+            startPromptCard.style.display = 'block';
+            return;
+        }
+        interviewCard.style.display = 'block';
+        isInterviewActive = true;
+        await beginInterviewSession();
+    });
+
+    // --- Interview Logic ---
+    const setupCameraAndRecorder = async () => {
         try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            videoPreview.srcObject = stream;
+            videoPreview.addEventListener('playing', runObjectDetection);
+            const options = { mimeType: 'video/webm; codecs=vp8,opus' };
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) delete options.mimeType;
+            mediaRecorder = new MediaRecorder(stream, options);
+            mediaRecorder.ondataavailable = (event) => { if (event.data.size > 0) recordedChunks.push(event.data); };
+            mediaRecorder.onstop = () => {
+                const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
+                recordedChunks = [];
+                if (isInterviewActive) { // Only submit if interview hasn't been terminated
+                    handleRecordingSubmission(videoBlob);
+                }
+            };
+            return true;
+        } catch (err) {
+            console.error("Media Device Error:", err);
+            return false;
+        }
+    };
+
+    const beginInterviewSession = async () => {
+        chatHistory = [];
+        addMessageToChat('model', "Welcome! Your first question is being generated...");
+        try {
+            const initialHistory = [{ role: 'user', content: "Please start the interview with the first question." }];
             const res = await fetch(`${API_URL}/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    job_description: jobDescription,
-                    chat_history: chatHistory,
-                    difficulty: selectedDifficulty
-                }),
+                body: JSON.stringify({ job_description: jobDescription, chat_history: initialHistory, difficulty: selectedDifficulty }),
             });
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            if (!res.ok) throw new Error('Failed to get first question.');
             const data = await res.json();
-            addMessageToChat('model', data.reply);
-            chatHistory.push({ role: 'model', content: data.reply });
+            
+            currentQuestion = data.reply;
+            addMessageToChat('model', currentQuestion);
+            recordBtn.disabled = false;
         } catch (error) {
-            console.error("Chat Error:", error);
-            addMessageToChat('model', "Sorry, an error occurred. Please try again.");
+            console.error("Start Interview Error:", error);
+            addMessageToChat('model', "Sorry, an error occurred. Please restart.");
         } finally {
             hideSpinner();
         }
     };
 
-    const handleSendUserResponse = async () => {
-        const userMessage = chatInput.value.trim();
-        if (!userMessage) return;
-        addMessageToChat('user', userMessage);
-        chatHistory.push({ role: 'user', content: userMessage });
-        chatInput.value = '';
-        await getAiResponse();
+    const handleRecordingSubmission = async (videoBlob) => {
+        showSpinner();
+        recordBtn.disabled = true;
+        
+        const formData = new FormData();
+        formData.append('video_file', videoBlob, 'answer.webm');
+        formData.append('question', currentQuestion);
+        formData.append('job_description', jobDescription);
+        
+        try {
+            const res = await fetch(`${API_URL}/video`, { method: 'POST', body: formData });
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            const data = await res.json();
+            
+            chatHistory.push({ role: 'model', content: `Question: ${currentQuestion}` }, { role: 'user', content: `(Provided a spoken answer)` }, { role: 'model', content: `Feedback: ${data.feedback}` });
+            addMessageToChat('model', `<strong>Feedback:</strong><br>${data.feedback}<br><br><strong>Next question:</strong><br>${data.next_question}`);
+            currentQuestion = data.next_question;
+            recordBtn.disabled = false;
+        } catch (error) {
+            console.error("Recording Submission Error:", error);
+            addMessageToChat('model', "Sorry, an error occurred. Please try recording again.");
+            recordBtn.disabled = false;
+        } finally {
+            hideSpinner();
+        }
     };
+    
+    // --- Event Listeners ---
+    recordBtn.addEventListener('click', () => {
+        if (mediaRecorder?.state === 'inactive') {
+            mediaRecorder.start();
+            recordBtn.disabled = true; stopBtn.disabled = false; endInterviewBtn.disabled = true;
+            recordingIndicator.style.display = 'block';
+        }
+    });
 
-    const handleEndInterview = async () => {
-        chatCard.style.display = 'none';
+    stopBtn.addEventListener('click', () => {
+        if (mediaRecorder?.state === 'recording') {
+            mediaRecorder.stop();
+            stopBtn.disabled = true; endInterviewBtn.disabled = false;
+            recordingIndicator.style.display = 'none';
+        }
+    });
+
+    const generateSummary = async (extraData = {}) => {
         showSpinner();
         try {
             const res = await fetch(`${API_URL}/summarize`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    job_description: jobDescription,
-                    chat_history: chatHistory
+                body: JSON.stringify({ 
+                    job_description: jobDescription, 
+                    chat_history: chatHistory,
+                    proctoring_data: { 
+                        tab_switch_count: tabSwitchCount,
+                        phone_detection_count: phoneDetectionCount,
+                        no_person_warnings: noPersonWarningCount,
+                        multiple_person_warnings: multiplePeopleWarningCount,
+                        ...extraData
+                    }
                 }),
             });
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -143,67 +291,42 @@ document.addEventListener('DOMContentLoaded', () => {
             summaryCard.style.display = 'block';
         } catch (error) {
             console.error("Summary Error:", error);
-            summaryContent.innerHTML = `<p>Sorry, an error occurred while generating your feedback. Please try again.</p>`;
+            summaryContent.innerHTML = `<p>An error occurred generating feedback.</p>`;
             summaryCard.style.display = 'block';
         } finally {
             hideSpinner();
         }
     };
 
-    const displaySummary = (summary) => {
-        let strengthsHtml = (summary.strengths || []).map(s => `<li class="strength">${s}</li>`).join('');
-        let improvementsHtml = (summary.areas_for_improvement || []).map(i => `<li class="improvement">${i}</li>`).join('');
+    endInterviewBtn.addEventListener('click', () => {
+        if (isInterviewActive) {
+            isInterviewActive = false; 
+            interviewCard.style.display = 'none';
+            if (videoPreview.srcObject) {
+                videoPreview.srcObject.getTracks().forEach(track => track.stop());
+            }
+            generateSummary();
+        }
+    });
 
+    const displaySummary = (summary) => {
+        const strengthsHtml = (summary.strengths || []).map(s => `<li class="strength">${s}</li>`).join('');
+        const improvementsHtml = (summary.areas_for_improvement || []).map(i => `<li class="improvement">${i}</li>`).join('');
         summaryContent.innerHTML = `
             <h3>Overall Score: ${summary.overall_score || 'N/A'}/100</h3>
-            
-            <h3>Strengths</h3>
-            <ul>${strengthsHtml || '<li>No specific strengths identified.</li>'}</ul>
-            
-            <h3>Areas for Improvement</h3>
-            <ul>${improvementsHtml || '<li>No specific areas for improvement identified.</li>'}</ul>
-            
-            <div id="overall-feedback">
-                <h3>Overall Feedback</h3>
-                <p>${summary.overall_feedback || 'No overall feedback available.'}</p>
-            </div>
+            <h3>Strengths</h3><ul>${strengthsHtml || '<li>Not identified.</li>'}</ul>
+            <h3>Areas for Improvement</h3><ul>${improvementsHtml || '<li>Not identified.</li>'}</ul>
+            <div id="overall-feedback"><h3>Overall Feedback</h3><p>${summary.overall_feedback || 'Not available.'}</p></div>
         `;
     };
     
-    const resetInterview = () => {
-        level1Card.style.display = 'block';
-        difficultyCard.style.display = 'none';
-        chatCard.style.display = 'none';
-        summaryCard.style.display = 'none';
-        chatMessagesContainer.innerHTML = '';
-        jobDescription = '';
-        chatHistory = [];
-        jobDescriptionInput.value = '';
-    };
-
-    sendChatBtn.addEventListener('click', handleSendUserResponse);
-    chatInput.addEventListener('keypress', e => {
-        if (e.key === 'Enter') {
-            handleSendUserResponse();
-        }
-    });
-    endInterviewBtn.addEventListener('click', handleEndInterview);
-    restartInterviewBtn.addEventListener('click', resetInterview);
-
-});
-
-
+    restartInterviewBtn.addEventListener('click', () => window.location.reload());
+    
     const logoutButton = document.getElementById("logoutButton");
     if (logoutButton) {
         logoutButton.addEventListener("click", async () => {
-            try {
-                await firebase.auth().signOut();
-            } catch (error) {
-                console.error("Error signing out:", error);
-                alert("Failed to log out. Please try again.");
-            }
+            try { await firebase.auth().signOut(); } 
+            catch (error) { console.error("Error signing out:", error); }
         });
     }
-
-
-
+});
