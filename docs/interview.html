@@ -3,79 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Mock Interview</title>
+    <title>AI Video Mock Interview</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style/interview.css">
     <link rel="icon" type="image/png" href="./assets/favicon.png"> 
+        <!-- NEW: Add TensorFlow.js libraries for Object Detection -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 </head>
 <body>
     <div class="background-glow"></div>
 
+    <!-- NEW: Toast Notification Element -->
+    <div id="toast-notification" class="toast"></div>
     <main class="interview-container">
         <header class="page-header">
-            <h1><i class="fas fa-comments"></i> AI Mock Interview</h1>
+             <h1><i class="fas fa-video"></i> AI Video Interview</h1>
             <nav class="header-nav">
                 <a href="home.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
                 <button id="logoutButton" class="nav-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </nav>
         </header>
 
-        <section class="card" id="level-1-card">
+        <!-- Step 1-3 remain the same -->
+        <section class="card" id="job-description-card">
             <h2><i class="fas fa-paste"></i> Job Description</h2>
-            <p class="muted-text">Paste a <strong>job description</strong> below to begin a realistic, AI-driven technical interview.</p>
+            <p class="muted-text">Paste a job description to begin a realistic, AI-driven video interview.</p>
             <textarea id="job-description-input" placeholder="Paste the job description here..."></textarea>
-            <div class="form-actions">
-                <button id="analyze-btn" class="btn primary-btn">Analyze & Proceed</button>
+            <div class="form-actions"><button id="proceed-to-difficulty-btn" class="btn primary-btn">Analyze & Proceed</button></div>
+        </section>
+
+        <section class="card" id="difficulty-card" style="display: none;">
+            <h2><i class="fas fa-sliders-h"></i> Select Interview Difficulty</h2>
+            <div class="difficulty-buttons">
+                <div class="difficulty-btn" data-difficulty="easy"><h4>Easy</h4><p>Entry-level</p></div>
+                <div class="difficulty-btn" data-difficulty="medium"><h4>Medium</h4><p>Mid-level</p></div>
+                <div class="difficulty-btn" data-difficulty="hard"><h4>Hard</h4><p>Senior-level</p></div>
+            </div>
+        </section>
+
+        <section class="card" id="start-prompt-card" style="display: none;">
+            <h2><i class="fas fa-check-circle"></i> Ready to Begin?</h2>
+            <p class="muted-text">Your browser will now ask for camera and microphone permissions.</p>
+            <div id="confirmation-details"></div>
+            <div class="form-actions"><button id="start-interview-btn" class="btn primary-btn"><i class="fas fa-play-circle"></i> Start Video Interview</button></div>
+        </section>
+
+        <!-- Step 4: The Main Interview (Updated Structure) -->
+        <section class="card" id="interview-card" style="display: none;">
+            <div class="video-interface">
+                <div class="video-container">
+                    <video id="video-preview" autoplay muted></video>
+                    <div id="recording-indicator" style="display: none;">REC ●</div>
+                </div>
+                <div class="video-controls">
+                    <button id="record-btn" class="btn primary-btn" disabled><i class="fas fa-video"></i> Record</button>
+                    <button id="stop-btn" class="btn secondary-btn" disabled><i class="fas fa-stop"></i> Submit</button>
+                </div>
+            </div>
+            
+            <div class="interview-dialogue">
+                <h2 id="interview-header-title">Live Interview</h2>
+                <div class="chat-messages" id="chat-messages"></div>
+            </div>
+            
+            <div class="form-actions main-controls">
+                <button id="end-interview-btn" class="btn secondary-btn">End Interview & Get Summary</button>
             </div>
         </section>
 
         <div class="spinner-container" id="spinner-container" style="display: none;">
             <div class="spinner"></div>
         </div>
-        
-        <section class="card" id="difficulty-card" style="display: none;">
-            <h2><i class="fas fa-sliders-h"></i> Select Interview Difficulty</h2>
-            <p class="muted-text">The AI's <strong>personality</strong> and <strong>question style</strong> will adapt to your choice.</p>
-            <div class="difficulty-buttons">
-                <div id="easy-btn" class="difficulty-btn" data-difficulty="easy">
-                    <h4>Easy</h4>
-                    <p>For entry-level roles.</p>
-                </div>
-                <div id="medium-btn" class="difficulty-btn" data-difficulty="medium">
-                    <h4>Medium</h4>
-                    <p>For mid-level roles.</p>
-                </div>
-                <div id="hard-btn" class="difficulty-btn" data-difficulty="hard">
-                    <h4>Hard</h4>
-                    <p>For senior-level roles.</p>
-                </div>
-            </div>
-        </section>
 
-        <section class="card" id="chat-card" style="display: none;">
-            <div class="chat-header">
-                <h2 id="chat-header-title">AI Mock Interview</h2>
-            </div>
-            <div class="chat-messages" id="chat-messages">
-                </div>
-            <div class="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Your answer...">
-                <button id="send-chat-btn" class="btn primary-btn"><i class="fas fa-paper-plane"></i> Send</button>
-                <button id="end-interview-btn" class="btn secondary-btn">End Interview</button>
-            </div>
-        </section>
-
+        <!-- Step 5: Summary -->
         <section class="card" id="summary-card" style="display: none;">
             <h2><i class="fas fa-award"></i> Interview Performance Summary</h2>
-            <div id="summary-content">
-                </div>
-            <div class="form-actions">
-                <button id="restart-interview-btn" class="btn primary-btn">Start a New Interview</button>
-            </div>
+            <div id="summary-content"></div>
+            <div class="form-actions"><button id="restart-interview-btn" class="btn primary-btn">Start New Interview</button></div>
         </section>
-
     </main>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
