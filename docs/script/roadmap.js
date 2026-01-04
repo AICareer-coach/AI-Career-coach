@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://ai-career-coach-backend-amp9.onrender.com';
+const API_BASE_URL = 'http://localhost:8000'; // Update this if your backend is hosted elsewhere
 
 let currentUser = null;
 let currentRoadmapData = null; // To store the generated/fetched roadmap
@@ -185,6 +185,59 @@ async function fetchAndAutofillSkills() {
   }
 }
 
+// Add this to your DOM Element References
+const syncToGoogleBtn = document.getElementById("syncToGoogleBtn"); // Ensure this button exists in HTML
+
+// Add this to initializeEventListeners()
+if (syncToGoogleBtn) {
+    syncToGoogleBtn.addEventListener("click", handleSyncToGoogle);
+}
+
+// Add this new function
+async function handleSyncToGoogle() {
+    if (!currentRoadmapData) {
+        alert("Please generate a roadmap first!");
+        return;
+    }
+
+    // 1. Retrieve the token we saved during login
+    const googleAccessToken = sessionStorage.getItem('googleAccessToken');
+    
+    if (!googleAccessToken) {
+        alert("Google Access Token missing. Please logout and login again to grant permissions.");
+        return;
+    }
+
+    showLoading(true, syncToGoogleBtn, "Syncing to Google...");
+
+    try {
+        const idToken = await currentUser.getIdToken(); // Firebase Auth Token for backend security
+
+        const response = await fetch(`${API_BASE_URL}/api/roadmap/sync`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${idToken}`
+            },
+            body: JSON.stringify({
+                google_access_token: googleAccessToken, // Send the Google Token
+                roadmap_data: currentRoadmapData        // Send the roadmap to parse
+            }),
+        });
+
+        const result = await response.json();
+        
+        if (!response.ok) throw new Error(result.detail || "Sync failed");
+
+        alert("✅ Success! " + result.message);
+
+    } catch (error) {
+        console.error("Sync Error:", error);
+        alert("❌ Error: " + error.message);
+    } finally {
+        showLoading(false, syncToGoogleBtn, "Sync to Google Calendar");
+    }
+}
 /**
  * Handles the form submission to generate a new roadmap.
  * @param {Event} e The form submission event.
@@ -333,7 +386,7 @@ function renderInteractiveRoadmap(detailedRoadmap) {
         .map(
           (phase) => `
             <div class="roadmap-phase card">
-                <h4>${phase.phase_title} (${phase.phase_duration} weeks )</h4>
+                <h4>${phase.phase_title} (${phase.phase_duration} weeks)</h4>
                 <ul class="task-list">
                     ${(phase.topics || [])
                       .map(
@@ -658,9 +711,3 @@ function appendTypingIndicator() {
   chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
   return el;
 }
-
-
-
-
-
-
