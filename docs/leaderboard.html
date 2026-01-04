@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaderboard - AI Career Coach</title>
+    <link rel="stylesheet" href="./style/home.css" />
+    <link rel="stylesheet" href="./style/leaderboard.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="icon" type="image/png" href="./assets/favicon.png">
+</head>
+
+<body>
+    <div class="background-glow"></div>
+    <div class="particles-container" id="particles"></div>
+
+    <aside class="sidebar">
+        <header class="sidebar-header">
+            <h2><i class="fas fa-robot"></i> AI Career Coach</h2>
+        </header>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="home.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="roadmap.html"><i class="fas fa-route"></i> Roadmap</a></li>
+                <li><a href="optimizer.html"><i class="fas fa-file-alt"></i> Resume & LinkedIn</a></li>
+                <li><a href="assessment.html"><i class="fas fa-chart-line"></i> Skill Assessment</a></li>
+                <li><a href="joblisting.html"><i class="fas fa-briefcase"></i> Job Matching</a></li>
+                <li><a href="interview.html"><i class="fas fa-comments"></i> Mock Interview</a></li>
+                <li><a href="profile.html"><i class="fas fa-user-circle"></i> Profile Settings</a></li>
+
+                <li><a href="#" class="active"><i class="fas fa-trophy"></i> Leaderboard</a></li>
+            </ul>
+        </nav>
+        <footer class="sidebar-footer">
+            <button id="logout-btn-sidebar" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </footer>
+    </aside>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <h1>Community Leaderboard</h1>
+            <p>See who's leading the charge in career development. Earn points by generating roadmaps, taking
+                assessments, and optimizing your resume!</p>
+        </section>
+
+        <div class="podium-container" id="podium-container">
+        </div>
+
+        <div class="leaderboard-list-container">
+            <div class="filter-container">
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="skill-filter" placeholder="Filter by skill (e.g., Python, React)...">
+                </div>
+                <!-- NEW: Compare Button -->
+                <button id="compare-btn" class="compare-btn" disabled>
+                    <i class="fas fa-balance-scale"></i> Compare Selected (0/2)
+                </button>
+            </div>
+
+            <h3><i class="fas fa-list-ol"></i> Top Contenders</h3>
+            <div class="table-responsive">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Select</th> <!-- NEW Column -->
+                            <th>Rank</th>
+                            <th>User</th>
+                            <th>Total Score</th>
+                            <th>Roadmaps</th>
+                            <th>Assessments</th>
+                            <th>Contact</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- NEW: Comparison Modal -->
+    <div id="comparison-modal" class="modal-overlay">
+        <div class="modal-content comparison-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-balance-scale"></i> Comparison Result</h2>
+                <button class="close-modal-btn" id="close-comparison">&times;</button>
+            </div>
+            <div class="modal-body" id="comparison-body">
+                <!-- Content injected by JS -->
+                <div class="loading-spinner">
+                    <i class="fas fa-circle-notch fa-spin"></i> Analyzing profiles with AI...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="./script/auth.js"></script>
+    <script src="./script/leaderboard.js"></script>
+</body>
+
+</html>
