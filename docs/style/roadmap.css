@@ -15,6 +15,25 @@
     --font-main: 'Poppins', system-ui, sans-serif;
 }
 
+/* Google Sync Button Styling */
+.google-sync-btn {
+    background-color: #4285F4; /* Google Blue */
+    color: white;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px; /* Space between icon and text */
+}
+
+.google-sync-btn:hover {
+    background-color: #357ae8; /* Darker Blue on hover */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.google-sync-btn i {
+    font-size: 1.1em;
+}
 /* --- Base & Body Styles --- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
