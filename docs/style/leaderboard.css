@@ -43,7 +43,7 @@
 
 .rank-2 {
   order: 1;
-  height: 320px;
+  height: 340px;
   border-color: #C0C0C0;
   box-shadow: 0 0 20px rgba(192, 192, 192, 0.15);
 }
@@ -56,7 +56,7 @@
 
 .rank-3 {
   order: 3;
-  height: 280px;
+  height: 315px;
   border-color: #CD7F32;
   box-shadow: 0 0 20px rgba(205, 127, 50, 0.15);
 }
@@ -542,4 +542,5 @@
   font-size: 1.2rem;
   color: var(--text-muted);
   padding: 3rem;
+
 }
