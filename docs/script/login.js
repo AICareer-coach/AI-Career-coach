@@ -1,3 +1,4 @@
+
 const firebaseConfig = {
     apiKey: "AIzaSyDtuYr4icwQf2HsvByrCZeqbEex28lL6GI",
     authDomain: "genaihack-240d7.firebaseapp.com",
@@ -10,9 +11,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const provider = new firebase.auth.GoogleAuthProvider();
-
-// IMPORTANT: Ensure this matches your running backend URL (127.0.0.1 is safer than localhost)
-const API_BASE_URL = 'https://ai-career-coach-backend-amp9.onrender.com'; 
+const API_BASE_URL = 'http://localhost:8000'; // Update this if your backend is hosted elsewhere
 
 // --- DOM Element References ---
 const loginFormContainer = document.getElementById('login-form-container');
@@ -25,14 +24,9 @@ const googleSignInBtn = document.getElementById('google-signin-btn');
 const googleSignInBtnSignup = document.getElementById('google-signin-btn-signup');
 const errorMessageDiv = document.getElementById('error-message');
 
-// --- Global Flag for Race Condition Fix ---
-let isGoogleLoginPending = false;
-
 // --- Auth State Guard ---
 auth.onAuthStateChanged(user => {
-    // FIX: Only redirect if we are NOT in the middle of a Google Login.
-    // If we are, handleGoogleAuth() will handle the redirect after saving the token.
-    if (user && !isGoogleLoginPending) {
+    if (user) {
         // console.log("User is signed in, redirecting to home.");
         document.body.classList.add('auth-success');
         setTimeout(() => {
@@ -76,7 +70,6 @@ signupForm.addEventListener('submit', async (e) => {
 
         if (!response.ok) { throw await response.json(); }
         
-        // Redirect is handled by onAuthStateChanged because isGoogleLoginPending is false
     } catch (error) {
         showError(error.detail || error.message);
     }
@@ -94,50 +87,18 @@ loginForm.addEventListener('submit', async (e) => {
         showError(error.message);
     }
 });
-// --- REPLACE YOUR handleGoogleAuth FUNCTION WITH THIS ---
 
+// --- Google Sign-in/Sign-up Handler ---
 const handleGoogleAuth = async () => {
     hideError();
-    isGoogleLoginPending = true; 
-
     try {
         const provider = new firebase.auth.GoogleAuthProvider();
-        provider.addScope('https://www.googleapis.com/auth/calendar.events');
-        provider.addScope('https://www.googleapis.com/auth/tasks');
-        
-        // FORCE CONSENT to ensure we get a token
-        provider.setCustomParameters({ prompt: 'consent' });
-
+        provider.setCustomParameters({
+            prompt: 'select_account'
+        });
         const result = await auth.signInWithPopup(provider);
-        
-        // --- DEBUGGING LOGS ---
-        console.log("Login Result:", result);
-        
-        let googleAccessToken = null;
-        
-        // Check method 1 (Standard)
-        if (result.credential && result.credential.accessToken) {
-            googleAccessToken = result.credential.accessToken;
-            console.log("Found token in result.credential");
-        } 
-        // Check method 2 (Helper)
-        else if (firebase.auth.GoogleAuthProvider.credentialFromResult) {
-            const cred = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
-            if (cred) {
-                googleAccessToken = cred.accessToken;
-                console.log("Found token via credentialFromResult");
-            }
-        }
+        const idToken = await result.user.getIdToken();
 
-        if (googleAccessToken) {
-            sessionStorage.setItem('googleAccessToken', googleAccessToken);
-            console.log("✅ TOKEN SAVED:", googleAccessToken); // Look for this in console
-        } else {
-            console.error("❌ NO TOKEN FOUND IN RESULT. Check scopes.");
-        }
-
-        // Proceed with backend login
-        const idToken = await result.user.getIdToken(); 
         const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -145,16 +106,8 @@ const handleGoogleAuth = async () => {
         });
 
         if (!response.ok) { throw await response.json(); }
-        
-        document.body.classList.add('auth-success');
-        setTimeout(() => {
-            window.location.href = 'home.html';
-        }, 500);
-
     } catch (error) {
-        console.error("Google Auth Error:", error);
         showError(error.detail || error.message);
-        isGoogleLoginPending = false; 
     }
 };
 
@@ -189,4 +142,5 @@ document.querySelectorAll('.toggle-password').forEach(toggle => {
             icon.classList.add('fa-eye');
         }
     });
+
 });
