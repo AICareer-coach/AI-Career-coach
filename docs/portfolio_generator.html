@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio Generator - AI Career Coach</title>
+    <link rel="stylesheet" href="./style/optimizer.css" />
+    <link rel="stylesheet" href="./style/portfolio_generator.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="icon" type="image/png" href="./assets/favicon.png">
+    
+    <!-- generator-specific styles are in ./style/portfolio_generator.css -->
+</head>
+<body>
+    <div class="background-glow"></div>
+
+    <!-- Top header nav (replaces previous sidebar) -->
+
+    <div class="container-wrapper">
+        <div class="container">
+            <main class="main-content">
+                <header class="page-header">
+                    <h1><i class="fas fa-laptop-code"></i> AI Portfolio Generator</h1>
+                    <nav class="header-nav">
+                        <a href="home.html" class="nav-link"><i class="fas fa-arrow-left"></i> Home</a>
+                        <a href="#" class="nav-link active"><i class="fas fa-laptop-code"></i> Generator</a>
+                        <a href="profile.html" class="nav-link"><i class="fas fa-user-circle"></i> Profile</a>
+                       
+                        <button id="logoutButton" class="nav-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    </nav>
+                </header>
+                <p class="page-intro">Convert your resume into a stunning, hosted personal website in seconds.</p>
+
+                <div class="card generator-container">
+            <!-- 1. Template Selection Section -->
+            <div class="template-selection">
+                <h3><i class="fas fa-palette"></i> Choose Your Design Style</h3>
+                <div class="template-grid">
+                    <label class="template-card">
+                        <input type="radio" name="template_choice" value="modern.html" checked>
+                        <div class="card-content">
+                            <div class="preview-box modern-preview"></div>
+                            <span>Modern Pro</span>
+                        </div>
+                    </label>
+                    <label class="template-card">
+                        <input type="radio" name="template_choice" value="developer.html">
+                        <div class="card-content">
+                            <div class="preview-box dev-preview"></div>
+                            <span>Developer (Dark)</span>
+                        </div>
+                    </label>
+                    <label class="template-card">
+                        <input type="radio" name="template_choice" value="minimal.html">
+                        <div class="card-content">
+                            <div class="preview-box minimal-preview"></div>
+                            <span>Minimalist</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Upload heading (keeps form compact below) -->
+            <div class="upload-header">
+                <h3><i class="fas fa-file-upload"></i> Upload New Resume</h3>
+                <p>Upload a PDF or DOCX to build your portfolio from a new file.</p>
+            </div>
+
+            <!-- 2. Controls row: Upload (left) and Generate (right) -->
+            <div class="controls-row">
+                <div class="upload-section">
+                    <div class="custom-upload">
+                        <input type="file" id="resume-upload" accept=".pdf,.docx" class="hidden" />
+                        <label for="resume-upload" class="btn secondary-btn">
+                            <i class="fas fa-cloud-upload-alt"></i> Select Resume File
+                        </label>
+                        <span id="file-name-display">No file selected</span>
+                    </div>
+                </div>
+
+                <div class="divider vertical"><span>OR</span></div>
+
+                <div class="action-card">
+                    <button id="generate-btn" class="btn primary-btn">
+                        <i class="fas fa-magic"></i> Generate from Profile Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- 4. Loading State -->
+            <div id="loading" class="hidden">
+                <div class="spinner"></div>
+                <p id="loading-text">Crafting your digital presence...</p>
+            </div>
+
+            <!-- Preview window (always visible) -->
+            <div class="preview-window">
+                <div class="preview-toolbar">
+                    <button id="edit-preview-btn" class="btn small-btn">Edit</button>
+                    <button id="save-preview-btn" class="btn small-btn primary-btn hidden">Save</button>
+                    <button id="cancel-edit-btn" class="btn small-btn hidden">Cancel</button>
+                </div>
+                <iframe id="preview-frame" title="Portfolio Preview"></iframe>
+            </div>
+
+            <!-- 5. Result Section -->
+            <div id="result" class="hidden">
+                <div class="url-card">
+                    <label>Your Live Portfolio URL:</label>
+                    <div class="url-input-group">
+                        <input type="text" id="generated-url" readonly />
+                        <button id="copy-btn" class="btn small-btn" title="Copy Link"><i class="fas fa-copy"></i> Copy</button>
+                        <button id="open-btn" class="btn small-btn" title="Visit Website"><i class="fas fa-external-link-alt"></i> Visit</button>
+                        <button id="download-btn" class="btn small-btn primary-btn" title="Download HTML Source">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- end .card.generator-container -->
+                </main>
+            </div>
+        </div>
+
+    <!-- Firebase & Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="./script/firebase-init.js"></script>
+    <script src="./script/auth.js"></script>
+    <script src="./script/portfolio_generator.js"></script>
+</body>
+</html>
