@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://ai-career-coach-backend-amp9.onrender.com';
+const API_BASE_URL = 'https://ai-career-coach-backend-amp9.onrender.com'; // Update this if your backend is hosted elsewhere
 
 let currentUser = null;
 let currentRoadmapData = null; // To store the generated/fetched roadmap
@@ -55,6 +55,13 @@ const chatMessagesDiv = document.getElementById("chat-messages");
 const chatInput = document.getElementById("chat-input");
 const chatbotForm = document.getElementById("chatbot-form");
 const logoutButton = document.getElementById("logoutButton");
+const personalizeRoadmapBtn = document.getElementById("personalizeRoadmapBtn");
+const avgAssessmentVal = document.getElementById("avg-assessment-val");
+const avgInterviewVal = document.getElementById("avg-interview-val");
+const latestAtsVal = document.getElementById("latest-ats-val");
+const courseProgressVal = document.getElementById("course-progress-val");
+const compositeScoreVal = document.getElementById("composite-score-val");
+const performanceFeedbackText = document.getElementById("performance-feedback-text");
 
 let timelineChartInstance = null;
 
@@ -108,6 +115,12 @@ function initializeEventListeners() {
   }
 
   if (logoutButton) logoutButton.addEventListener("click", handleLogout);
+  if (personalizeRoadmapBtn) {
+    console.log("✅ Personalize Roadmap button found, attaching listener.");
+    personalizeRoadmapBtn.addEventListener("click", handlePersonalizeRoadmap);
+  } else {
+    console.warn("❌ Personalize Roadmap button NOT found in DOM.");
+  }
 }
 
 /**
@@ -131,6 +144,9 @@ async function loadOrCreateRoadmap() {
       formCard.classList.add("hidden");
       resultsSection.classList.remove("hidden");
       chatbotFloatButton.classList.remove("hidden");
+
+      // NEW: Silent check for weekly auto-personalization
+      checkAutoPersonalize();
     } else if (response.status === 404) {
       formCard.classList.remove("hidden");
       resultsSection.classList.add("hidden");
@@ -170,14 +186,14 @@ async function fetchAndAutofillSkills() {
         .join(", ")}\n`;
     }
     if (content?.projects?.length) {
-  autofill += `Projects: ${content.projects
-    .map((p) => {
-        // Join the description array into a single string if it exists
-        const description = Array.isArray(p.description) ? p.description.join(' ') : p.description;
-        // Return a formatted string with both title and description
-        return `${p.title} - ${description || 'No description'}`;
-    })
-    .join("\n")}`; // Use a semicolon to better separate full project entries
+      autofill += `Projects: ${content.projects
+        .map((p) => {
+          // Join the description array into a single string if it exists
+          const description = Array.isArray(p.description) ? p.description.join(' ') : p.description;
+          // Return a formatted string with both title and description
+          return `${p.title} - ${description || 'No description'}`;
+        })
+        .join("\n")}`; // Use a semicolon to better separate full project entries
     }
     currentSkillsInput.value = autofill;
   } catch (error) {
@@ -190,53 +206,53 @@ const syncToGoogleBtn = document.getElementById("syncToGoogleBtn"); // Ensure th
 
 // Add this to initializeEventListeners()
 if (syncToGoogleBtn) {
-    syncToGoogleBtn.addEventListener("click", handleSyncToGoogle);
+  syncToGoogleBtn.addEventListener("click", handleSyncToGoogle);
 }
 
 // Add this new function
 async function handleSyncToGoogle() {
-    if (!currentRoadmapData) {
-        alert("Please generate a roadmap first!");
-        return;
-    }
+  if (!currentRoadmapData) {
+    alert("Please generate a roadmap first!");
+    return;
+  }
 
-    // 1. Retrieve the token we saved during login
-    const googleAccessToken = sessionStorage.getItem('googleAccessToken');
-    
-    if (!googleAccessToken) {
-        alert("Google Access Token missing. Please logout and login again to grant permissions.");
-        return;
-    }
+  // 1. Retrieve the token we saved during login
+  const googleAccessToken = sessionStorage.getItem('googleAccessToken');
 
-    showLoading(true, syncToGoogleBtn, "Syncing to Google...");
+  if (!googleAccessToken) {
+    alert("Google Access Token missing. Please logout and login again to grant permissions.");
+    return;
+  }
 
-    try {
-        const idToken = await currentUser.getIdToken(); // Firebase Auth Token for backend security
+  showLoading(true, syncToGoogleBtn, "Syncing to Google...");
 
-        const response = await fetch(`${API_BASE_URL}/api/roadmap/sync`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${idToken}`
-            },
-            body: JSON.stringify({
-                google_access_token: googleAccessToken, // Send the Google Token
-                roadmap_data: currentRoadmapData        // Send the roadmap to parse
-            }),
-        });
+  try {
+    const idToken = await currentUser.getIdToken(); // Firebase Auth Token for backend security
 
-        const result = await response.json();
-        
-        if (!response.ok) throw new Error(result.detail || "Sync failed");
+    const response = await fetch(`${API_BASE_URL}/api/roadmap/sync`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`
+      },
+      body: JSON.stringify({
+        google_access_token: googleAccessToken, // Send the Google Token
+        roadmap_data: currentRoadmapData        // Send the roadmap to parse
+      }),
+    });
 
-        alert("✅ Success! " + result.message);
+    const result = await response.json();
 
-    } catch (error) {
-        console.error("Sync Error:", error);
-        alert("❌ Error: " + error.message);
-    } finally {
-        showLoading(false, syncToGoogleBtn, "Sync to Google Calendar");
-    }
+    if (!response.ok) throw new Error(result.detail || "Sync failed");
+
+    alert("✅ Success! " + result.message);
+
+  } catch (error) {
+    console.error("Sync Error:", error);
+    alert("❌ Error: " + error.message);
+  } finally {
+    showLoading(false, syncToGoogleBtn, "Sync to Google Calendar");
+  }
 }
 /**
  * Handles the form submission to generate a new roadmap.
@@ -304,7 +320,240 @@ function displayRoadmap(roadmap) {
   if (roadmap.suggested_projects) renderProjects(roadmap.suggested_projects);
   if (roadmap.suggested_courses) renderCourses(roadmap.suggested_courses);
   updateOverallProgressBar();
+  loadPerformanceSummary();
 }
+
+/**
+ * Fetches the user's performance metrics from the backend.
+ */
+// Global variable for modal data
+let recentActivities = {};
+
+async function loadPerformanceSummary() {
+  try {
+    const idToken = await currentUser.getIdToken();
+    const response = await fetch(`${API_BASE_URL}/api/roadmap/performance`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${idToken}` }
+    });
+    if (!response.ok) return;
+    const stats = await response.json();
+    recentActivities = stats.recent_activities || {};
+
+    if (avgAssessmentVal) avgAssessmentVal.textContent = `${Math.round(stats.avg_assessment || 0)}%`;
+    if (avgInterviewVal) avgInterviewVal.textContent = `${Math.round(stats.avg_interview || 0)}%`;
+    if (latestAtsVal) latestAtsVal.textContent = `${Math.round(stats.latest_ats || 0)}%`;
+    if (courseProgressVal) courseProgressVal.textContent = `${Math.round(stats.completion_rate || 0)}%`;
+    if (compositeScoreVal) compositeScoreVal.textContent = `${Math.round(stats.composite_score || 0)}%`;
+
+    // Update Reasoning
+    const reasonContainer = document.getElementById('roadmap-reason-container');
+    const reasonText = document.getElementById('roadmap-reason-text');
+    if (reasonContainer && reasonText && stats.roadmap_reason) {
+      reasonText.textContent = stats.roadmap_reason;
+      reasonContainer.classList.remove('hidden');
+    }
+
+    const performanceDetails = document.getElementById('performance-details');
+    if (performanceDetails) performanceDetails.classList.remove('hidden');
+
+  } catch (err) {
+    console.error("Error loading performance summary:", err);
+  }
+}
+
+/**
+ * Modal Logic for Roadmap Page
+ */
+function openStatsModal(category) {
+  const modal = document.getElementById('stats-modal');
+  const title = document.getElementById('modal-title');
+  const container = document.getElementById('modal-details-container');
+
+  if (!modal || !container) return;
+
+  const categoryNames = {
+    'assessments': 'Recent Assessments',
+    'interviews': 'Mock Interviews',
+    'ats': 'ATS Score History',
+    'progress': 'Roadmap Progress'
+  };
+
+  title.textContent = categoryNames[category] || 'Activity Details';
+
+  const items = recentActivities[category] || [];
+  if (items.length === 0) {
+    container.innerHTML = `<div class="activity-item"><p class="activity-feedback">No recent ${category} found.</p></div>`;
+  } else {
+    container.innerHTML = items.map(item => `
+            <div class="activity-item">
+                <div class="activity-header">
+                    <span class="activity-name">${item.name}</span>
+                    <span class="activity-rating">${item.score}${category === 'progress' ? '' : '%'}</span>
+                </div>
+                <p class="activity-feedback">${item.feedback}</p>
+                <div class="activity-improvement">${item.improvement}</div>
+            </div>
+        `).join('');
+  }
+
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeStatsModal() {
+  const modal = document.getElementById('stats-modal');
+  if (modal) modal.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+// Close modal on outside click
+window.addEventListener('click', (event) => {
+  const modal = document.getElementById('stats-modal');
+  if (event.target == modal) {
+    closeStatsModal();
+  }
+});
+
+
+/**
+ * Sends a request to dynamically personalize the roadmap based on performance.
+ */
+async function handlePersonalizeRoadmap() {
+  console.log("🚀 Personalize button clicked!");
+  if (!currentRoadmapData) {
+    console.warn("⚠️ No roadmap data loaded yet.");
+    return;
+  }
+
+  const confirmUpdate = confirm("This will analyze your progress and scores to adjust your roadmap. This might add new topics or change your project tasks. Continue?");
+  if (!confirmUpdate) return;
+
+  console.log("📊 Starting evaluation process...");
+  showLoading(true, personalizeRoadmapBtn, "Analyzing Progress...");
+
+  try {
+    const idToken = await currentUser.getIdToken();
+    const googleAccessToken = sessionStorage.getItem('googleAccessToken');
+
+    console.log(`Calling API: ${API_BASE_URL}/api/roadmap/evaluate_and_update`);
+    const response = await fetch(`${API_BASE_URL}/api/roadmap/evaluate_and_update`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`
+      },
+      body: JSON.stringify({
+        google_access_token: googleAccessToken // Optional: can be used for auto-resync
+      })
+    });
+
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.detail || "Personalization failed.");
+
+    if (result.is_updated) {
+      currentRoadmapData = result.roadmap;
+      displayRoadmap(currentRoadmapData);
+
+      // SHOW REASONING MODAL instead of alert
+      showReasoningModal("Roadmap Personalized!", result.message, result.feedback);
+
+    } else {
+      showReasoningModal("No Changes Needed", result.message, "Your current progress is perfectly on track. Maintain this pace!");
+    }
+
+    if (performanceFeedbackText) {
+      performanceFeedbackText.textContent = result.feedback;
+      performanceFeedbackText.parentElement.classList.remove("hidden");
+    }
+
+    // If updated and we have google access, suggest re-sync
+    if (result.is_updated && googleAccessToken) {
+      const resync = confirm("Your roadmap changed. Would you like to re-sync it to your Google Calendar now?");
+      if (resync) handleSyncToGoogle();
+    }
+
+  } catch (error) {
+    console.error("Personalization Error:", error);
+    alert("❌ Error: " + error.message);
+  } finally {
+    showLoading(false, personalizeRoadmapBtn, "Personalize My Roadmap");
+  }
+}
+
+/**
+ * Silent check for weekly auto-personalization.
+ */
+async function checkAutoPersonalize() {
+  try {
+    const idToken = await currentUser.getIdToken();
+    const response = await fetch(`${API_BASE_URL}/api/roadmap/check_auto_personalize`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${idToken}` }
+    });
+
+    if (!response.ok) return;
+    const result = await response.json();
+
+    if (result.is_updated) {
+      currentRoadmapData = result.roadmap;
+      displayRoadmap(currentRoadmapData);
+
+      // Show notification banner/toast
+      showAutoUpdateNotification(result.message, result.feedback);
+    }
+  } catch (err) {
+    console.error("Silent personalization check failed:", err);
+  }
+}
+
+/**
+ * Displays a non-intrusive notification banner for auto-updates.
+ */
+/**
+ * Displays the Unified AI Reasoning Modal (Popup).
+ */
+function showReasoningModal(title, message, reasoningText) {
+  // Remove existing modal if any
+  const existing = document.querySelector('.reasoning-modal');
+  if (existing) existing.remove();
+
+  const modalOverlay = document.createElement('div');
+  modalOverlay.className = 'reasoning-modal';
+
+  modalOverlay.innerHTML = `
+      <div class="reasoning-content">
+          <i class="fas fa-brain reasoning-icon"></i>
+          <h2 class="reasoning-title">${title}</h2>
+          <p class="reasoning-message">${message}</p>
+          
+          <div class="reasoning-box">
+              <span class="reasoning-label">AI Logic & Reasoning:</span>
+              <p class="reasoning-text">"${reasoningText}"</p>
+          </div>
+
+          <button class="reasoning-close-btn">Understood, Continue Journey</button>
+      </div>
+  `;
+
+  document.body.appendChild(modalOverlay);
+
+  // Close Handler
+  const closeBtn = modalOverlay.querySelector('.reasoning-close-btn');
+  closeBtn.onclick = () => {
+    modalOverlay.style.animation = 'fadeOut 0.3s ease-out';
+    setTimeout(() => modalOverlay.remove(), 280);
+  };
+}
+
+/**
+ * Displays a non-intrusive notification banner for auto-updates.
+ * @deprecated Replaced by showReasoningModal for consistency.
+ */
+function showAutoUpdateNotification(message, feedback) {
+  showReasoningModal("Automatic Weekly Update", message, feedback);
+}
+
 
 /**
  * Renders the job match score and donut chart.
@@ -314,9 +563,8 @@ function renderScore(scoreData) {
   scoreValueSpan.textContent = `${scoreData.score || 0}%`;
   const scoreCircle = document.querySelector(".score-circle");
   if (scoreCircle) {
-    scoreCircle.style.background = `conic-gradient(var(--primary) ${
-      scoreData.score * 3.6
-    }deg, var(--border-color) 0deg)`;
+    scoreCircle.style.background = `conic-gradient(var(--primary) ${scoreData.score * 3.6
+      }deg, var(--border-color) 0deg)`;
   }
   scoreSummaryP.textContent = scoreData.summary || "N/A";
 }
@@ -383,33 +631,30 @@ function renderTimelineChart(chartData) {
 function renderInteractiveRoadmap(detailedRoadmap) {
   detailedRoadmapContainer.innerHTML = detailedRoadmap?.length
     ? detailedRoadmap
-        .map(
-          (phase) => `
+      .map(
+        (phase) => `
             <div class="roadmap-phase card">
                 <h4>${phase.phase_title} (${phase.phase_duration} weeks)</h4>
                 <ul class="task-list">
                     ${(phase.topics || [])
-                      .map(
-                        (topic) => `
+            .map(
+              (topic) => `
                         <li class="task-item">
                             <label class="task-label">
-                                <input type="checkbox" data-phase="${
-                                  phase.phase_title
-                                }" data-topic="${topic.name}" ${
-                          topic.is_completed ? "checked" : ""
-                        }>
+                                <input type="checkbox" data-phase="${phase.phase_title
+                }" data-topic="${topic.name}" ${topic.is_completed ? "checked" : ""
+                }>
                                 <span class="task-text">${topic.name}</span>
                             </label>
-                            <button class="help-btn btn secondary-btn" data-topic="${
-                              topic.name
-                            }"><i class="fas fa-question-circle"></i> I'm Stuck</button>
+                            <button class="help-btn btn secondary-btn" data-topic="${topic.name
+                }"><i class="fas fa-question-circle"></i> I'm Stuck</button>
                         </li>`
-                      )
-                      .join("")}
+            )
+            .join("")}
                 </ul>
             </div>`
-        )
-        .join("")
+      )
+      .join("")
     : "<p>No detailed steps available.</p>";
 }
 
@@ -417,23 +662,22 @@ function renderInteractiveRoadmap(detailedRoadmap) {
 function renderProjects(projects) {
   projectsContainer.innerHTML = projects?.length
     ? projects
-        .map(
-          (proj) => `
+      .map(
+        (proj) => `
             <div class="project-card card">
-                <h4>${proj.project_title} <span class="tag">${
-            proj.project_level
+                <h4>${proj.project_title} <span class="tag">${proj.project_level
           }</span></h4>
                 <p><strong>Skills Covered:</strong> ${proj.skills_mapped.join(
-                  ", "
-                )}</p>
+            ", "
+          )}</p>
                 <p>${proj.what_you_will_learn}</p>
                 <strong>Implementation Plan:</strong>
                 <ol>${proj.implementation_plan
-                  .map((step) => `<li>${step}</li>`)
-                  .join("")}</ol>
+            .map((step) => `<li>${step}</li>`)
+            .join("")}</ol>
             </div>`
-        )
-        .join("")
+      )
+      .join("")
     : "<p>No project suggestions available.</p>";
 }
 
@@ -441,15 +685,15 @@ function renderProjects(projects) {
 function renderCourses(courses) {
   coursesContainer.innerHTML = courses?.length
     ? courses
-        .map(
-          (course) => `
+      .map(
+        (course) => `
             <div class="course-card card">
                 <h4><a href="${course.url}" target="_blank" rel="noopener noreferrer">${course.course_name} <i class="fas fa-external-link-alt"></i></a></h4>
                 <p><span class="tag platform-tag">${course.platform}</span></p>
                 <p class="mapping">${course.mapping}</p>
             </div>`
-        )
-        .join("")
+      )
+      .join("")
     : "<p>No course recommendations available.</p>";
 }
 
@@ -616,9 +860,8 @@ async function handleHelpButtonClick(event) {
     const data = await response.json();
     renderTutorResponse(data);
   } catch (error) {
-    analogyTextP.textContent = `Could not fetch explanation. Error: ${
-      error.detail || error.message
-    }`;
+    analogyTextP.textContent = `Could not fetch explanation. Error: ${error.detail || error.message
+      }`;
     technicalDefinitionTextDiv.innerHTML = "";
     prerequisitesListUl.innerHTML = "";
     tutorResponseContent.classList.remove("hidden");
@@ -711,4 +954,3 @@ function appendTypingIndicator() {
   chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
   return el;
 }
-
