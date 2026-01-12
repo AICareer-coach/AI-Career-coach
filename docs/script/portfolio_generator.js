@@ -50,7 +50,7 @@ uploadInput.addEventListener("change", async (e) => {
     
     try {
         // --- UPDATED: Added template_id to the URL ---
-        const response = await fetch(`https://ai-career-coach-backend-amp9.onrender.comapi/portfolio/generate-direct?template_id=${selectedTemplate}`, {
+        const response = await fetch(`https://ai-career-coach-backend-amp9.onrender.com/api/portfolio/generate-direct?template_id=${selectedTemplate}`, {
             method: "POST",
             headers: { 'Authorization': `Bearer ${idToken}` },
             body: formData
