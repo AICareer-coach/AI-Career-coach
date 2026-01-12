@@ -1,14 +1,3 @@
-const firebaseConfig = {
-    apiKey: "AIzaSyDtuYr4icwQf2HsvByrCZeqbEex28lL6GI",
-    authDomain: "genaihack-240d7.firebaseapp.com",
-    projectId: "genaihack-240d7",
-    storageBucket: "genaihack-240d7.firebasestorage.app",
-    messagingSenderId: "1095624251792",
-    appId: "1:1095624251792:web:8b4be21e68c1a8bcc2bb15"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
 const provider = new firebase.auth.GoogleAuthProvider();
 
 // IMPORTANT: Ensure this matches your running backend URL (127.0.0.1 is safer than localhost)
@@ -79,6 +68,11 @@ signupForm.addEventListener('submit', async (e) => {
         // Redirect is handled by onAuthStateChanged because isGoogleLoginPending is false
     } catch (error) {
         showError(error.detail || error.message);
+        // ADD THIS: Sign out the user if backend verification failed
+        // This prevents them from being "logged in" on refresh if the server rejected them.
+        auth.signOut(); 
+        
+        isGoogleLoginPending = false;
     }
 });
 
@@ -131,13 +125,13 @@ const handleGoogleAuth = async () => {
 
         if (googleAccessToken) {
             sessionStorage.setItem('googleAccessToken', googleAccessToken);
-            console.log("✅ TOKEN SAVED:", googleAccessToken); // Look for this in console
+            // console.log("✅ TOKEN SAVED:", googleAccessToken); // Look for this in console
         } else {
             console.error("❌ NO TOKEN FOUND IN RESULT. Check scopes.");
         }
 
         // Proceed with backend login
-        const idToken = await result.user.getIdToken(); 
+        const idToken = await result.user.getIdToken(true); 
         const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -153,7 +147,23 @@ const handleGoogleAuth = async () => {
 
     } catch (error) {
         console.error("Google Auth Error:", error);
-        showError(error.detail || error.message);
+        
+        // --- THE FIX ---
+        // If the backend rejected us, we must force the browser to forget the user too.
+        // This prevents the "Refresh to login" loophole.
+        if (auth.currentUser) {
+            // console.log("Backend rejection detected. Signing out from frontend...");
+            auth.signOut(); 
+        }
+        // ----------------
+        
+        // Show a helpful message if it looks like a clock issue
+        if (error.detail && error.detail.includes("token")) {
+             showError("Login failed: System time mismatch. Please sync your computer's clock and try again.");
+        } else {
+             showError(error.detail || error.message);
+        }
+
         isGoogleLoginPending = false; 
     }
 };
