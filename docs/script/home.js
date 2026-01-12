@@ -71,6 +71,7 @@ function onUserLoggedIn(user) {
     document.getElementById('assessment-card')?.addEventListener('click', () => window.location.href = 'assessment.html');
     document.getElementById('jobs-card')?.addEventListener('click', () => window.location.href = 'joblisting.html');
     document.getElementById('interview-card')?.addEventListener('click', () => window.location.href = 'interview.html');
+    document.getElementById('portfolio-card')?.addEventListener('click', () => window.location.href = 'portfolio_generator.html');
 
     // After elements are initialized and event listeners set, run animations
     createParticles();
@@ -343,3 +344,4 @@ async function fetchAndDisplayStats() {
     }
 
 }
+
